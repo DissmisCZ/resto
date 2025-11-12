@@ -666,8 +666,8 @@ def get_monthly_kpi_evaluation(mesic, location_id=None):
             e.kpi_id, k.nazev as kpi_nazev, k.jednotka,
             e.hodnota, e.splneno, e.bonus_procento
         FROM monthly_kpi_evaluation e
-        JOIN locations l ON e.location_id = l.id
-        JOIN kpi_definitions k ON e.kpi_id = k.id
+        LEFT JOIN locations l ON e.location_id = l.id
+        LEFT JOIN kpi_definitions k ON e.kpi_id = k.id
         WHERE e.mesic = ?
     """
 

@@ -269,7 +269,7 @@ if page == "📊 Přehled":
                     eval_data = db.get_monthly_kpi_evaluation(selected_month, loc['id'])
 
                     if eval_data.empty:
-                        st.info(f"Žádná data pro {loc['nazev']} v {format_month(selected_month)}")
+                        st.info(f"ℹ️ Žádná data pro {loc['nazev']} v {format_month(selected_month)}")
                     else:
                         # Display KPI table like Excel
                         cols = st.columns([3, 1, 1, 1, 1])
@@ -318,7 +318,8 @@ elif page == "📈 Detailní přehled":
     eval_data = db.get_monthly_kpi_evaluation(selected_month)
 
     if eval_data.empty:
-        st.info(f"Žádná data pro {format_month(selected_month)}")
+        st.warning(f"⚠️ Žádná data pro {format_month(selected_month)}")
+        st.info("💡 **Co udělat:**\n1. Přejděte do 'Zadání dat' a zadejte data\n2. Zajistěte že máte definované KPI hranice v 'Nastavení > KPI Hranice'\n3. Přejděte do 'Nastavení > Debug' a klikněte na 'Přepočítat bonusy'")
     else:
         # Join with managers data
         locs = get_locs()
@@ -401,7 +402,8 @@ elif page == "👥 Porovnání":
     eval_data = db.get_monthly_kpi_evaluation(selected_month)
 
     if eval_data.empty:
-        st.info(f"Žádná data pro {format_month(selected_month)}")
+        st.warning(f"⚠️ Žádná data pro {format_month(selected_month)}")
+        st.info("💡 **Co udělat:**\n1. Přejděte do 'Zadání dat' a zadejte data\n2. Zajistěte že máte definované KPI hranice v 'Nastavení > KPI Hranice'\n3. Přejděte do 'Nastavení > Debug' a klikněte na 'Přepočítat bonusy'")
     else:
         # Calculate summary for each manager
         locs = get_locs()
@@ -1114,26 +1116,28 @@ elif page == "⚙️ Admin":
 
     # TAB 5: KPI Thresholds
     with tab5:
-        st.markdown("### KPI Hranice a Bonusy")
+        st.markdown("### ⚙️ KPI Hranice a Bonusy")
+        st.info("💡 Můžete přidat více hranic pro jedno KPI (např. ≥85% = 10%, ≥95% = 20%)")
 
         # Select KPI to manage thresholds
         kpis = db.get_all_kpi_definitions()
         if kpis.empty:
-            st.warning("Nejdříve musíte vytvořit KPI definice v předchozím tabu")
+            st.warning("⚠️ Nejdříve musíte vytvořit KPI definice v předchozím tabu")
         else:
-            selected_kpi_name = st.selectbox("Vyberte KPI:", kpis['nazev'].tolist(), key="threshold_kpi_select")
+            selected_kpi_name = st.selectbox("🎯 Vyberte KPI:", kpis['nazev'].tolist(), key="threshold_kpi_select")
             selected_kpi_id = kpis[kpis['nazev'] == selected_kpi_name]['id'].values[0]
             selected_kpi_jednotka = kpis[kpis['id'] == selected_kpi_id]['jednotka'].values[0]
 
-            st.markdown(f"#### Hranice pro: **{selected_kpi_name}** ({selected_kpi_jednotka})")
+            st.markdown(f"#### 📋 Hranice pro: **{selected_kpi_name}** ({selected_kpi_jednotka})")
 
             # Display existing thresholds
             thresholds = db.get_kpi_thresholds(selected_kpi_id)
             if not thresholds.empty:
+                st.success(f"✅ Nalezeno {len(thresholds)} hranic pro toto KPI")
                 display_cols = ['min_hodnota', 'max_hodnota', 'operator', 'bonus_procento', 'popis', 'poradi']
                 st.dataframe(thresholds[display_cols], use_container_width=True, hide_index=True)
             else:
-                st.info("Zatím nejsou definovány hranice pro toto KPI")
+                st.info("ℹ️ Zatím nejsou definovány hranice pro toto KPI - přidejte první hranici níže")
 
             st.markdown("---")
             st.markdown("#### ➕ Přidat novou hranici")
@@ -1288,7 +1292,10 @@ elif page == "⚙️ Admin":
 
             cursor.execute("SELECT COUNT(*) FROM monthly_kpi_evaluation")
             eval_count = cursor.fetchone()[0]
-            st.metric("Vyhodnocení bonusů", eval_count)
+            if eval_count == 0 and data_count > 0:
+                st.metric("⚠️ Vyhodnocení bonusů", eval_count, delta="Chybí výpočet!", delta_color="off")
+            else:
+                st.metric("Vyhodnocení bonusů", eval_count)
 
         st.markdown("---")
         st.markdown("#### 📋 Ukázková Data")
@@ -1324,39 +1331,110 @@ elif page == "⚙️ Admin":
         else:
             st.warning("⚠️ Žádná KPI!")
 
-        st.markdown("**Měsíční Data (poslední záznamy):**")
+        st.markdown("**Měsíční Data (RAW - bez JOIN):**")
         cursor.execute("""
-            SELECT m.mesic, l.nazev as lokalita, k.nazev as kpi, m.hodnota
+            SELECT id, mesic, location_id, kpi_id, hodnota, status
+            FROM monthly_kpi_data
+            WHERE status = 'ACTIVE'
+            ORDER BY created_at DESC
+            LIMIT 10
+        """)
+        raw_data = cursor.fetchall()
+        if raw_data:
+            st.write(pd.DataFrame(raw_data, columns=['ID', 'Měsíc', 'Location ID', 'KPI ID', 'Hodnota', 'Status']))
+
+            # Check if those IDs exist in related tables
+            st.markdown("**🔍 Kontrola foreign keys:**")
+            for row in raw_data[:3]:  # Check first 3 records
+                record_id, mesic, loc_id, kpi_id, hodnota, status = row
+
+                # Check if location exists and is active
+                cursor.execute("SELECT id, nazev, aktivni FROM locations WHERE id = ?", (loc_id,))
+                loc_result = cursor.fetchone()
+
+                # Check if KPI exists and is active
+                cursor.execute("SELECT id, nazev, aktivni FROM kpi_definitions WHERE id = ?", (kpi_id,))
+                kpi_result = cursor.fetchone()
+
+                st.text(f"Záznam #{record_id} ({mesic}):")
+                if loc_result:
+                    st.text(f"  ✓ Lokalita ID {loc_id}: {loc_result[1]} (aktivni={loc_result[2]})")
+                else:
+                    st.error(f"  ✗ Lokalita ID {loc_id} NEEXISTUJE!")
+
+                if kpi_result:
+                    st.text(f"  ✓ KPI ID {kpi_id}: {kpi_result[1]} (aktivni={kpi_result[2]})")
+                else:
+                    st.error(f"  ✗ KPI ID {kpi_id} NEEXISTUJE!")
+        else:
+            st.warning("⚠️ Žádná měsíční data!")
+
+        st.markdown("---")
+        st.markdown("**Měsíční Data (s JOIN - pro porovnání):**")
+        cursor.execute("""
+            SELECT m.id, m.mesic, l.nazev as lokalita, k.nazev as kpi, m.hodnota
             FROM monthly_kpi_data m
-            JOIN locations l ON m.location_id = l.id
-            JOIN kpi_definitions k ON m.kpi_id = k.id
+            JOIN locations l ON m.location_id = l.id AND l.aktivni = 1
+            JOIN kpi_definitions k ON m.kpi_id = k.id AND k.aktivni = 1
             WHERE m.status = 'ACTIVE'
             ORDER BY m.created_at DESC
             LIMIT 10
         """)
         monthly_data = cursor.fetchall()
         if monthly_data:
-            st.write(pd.DataFrame(monthly_data, columns=['Měsíc', 'Lokalita', 'KPI', 'Hodnota']))
+            st.write(pd.DataFrame(monthly_data, columns=['ID', 'Měsíc', 'Lokalita', 'KPI', 'Hodnota']))
         else:
-            st.warning("⚠️ Žádná měsíční data! Začněte zadávat v 'Zadání dat'")
+            st.warning("⚠️ JOIN nevrátil žádná data! Problém s foreign keys nebo aktivni=0")
 
-        conn.close()
+        st.markdown("---")
+        st.markdown("#### 🔍 Analýza problémů")
+
+        problems = []
+        warnings = []
+
+        # Check if thresholds exist
+        cursor.execute("SELECT COUNT(*) FROM kpi_thresholds")
+        threshold_count = cursor.fetchone()[0]
+        if threshold_count == 0:
+            problems.append("❌ **Žádné KPI hranice!** Bez hranic se nemohou počítat bonusy.")
+            st.error("⚠️ KRITICKÝ PROBLÉM: Nejsou definované hranice pro KPI! Přejděte na tab 'KPI Hranice' a nastavte pravidla pro bonusy.")
+        else:
+            st.success(f"✅ Nalezeno {threshold_count} hranic pro výpočet bonusů")
+
+        # Check if data needs recalculation
+        cursor.execute("SELECT COUNT(*) FROM monthly_kpi_data WHERE status = 'ACTIVE'")
+        data_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM monthly_kpi_evaluation")
+        eval_count = cursor.fetchone()[0]
+
+        if data_count > 0 and eval_count == 0:
+            problems.append("❌ **Chybí vyhodnocení!** Máte data ale nebyla spočítána.")
+            st.error("⚠️ DATA NEBYLA VYHODNOCENA! Klikněte na tlačítko níže pro přepočítání.")
+        elif data_count > eval_count:
+            warnings.append(f"⚠️ Máte více dat ({data_count}) než vyhodnocení ({eval_count}). Doporučujeme přepočítat.")
+            st.warning(f"⚠️ Počet dat ({data_count}) neodpovídá počtu vyhodnocení ({eval_count}). Přepočítejte bonusy.")
 
         st.markdown("---")
         st.markdown("#### 🔄 Akce")
 
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("♻️ Přepočítat všechny bonusy", key="recalc_all_btn"):
+            if st.button("♻️ PŘEPOČÍTAT VŠECHNY BONUSY", key="recalc_all_btn", type="primary"):
                 months = db.get_all_months_with_data()
                 if months:
-                    for month in months:
-                        db.calculate_monthly_kpi_evaluation(month)
-                        db.calculate_department_summary(month)
-                    st.success(f"✅ Přepočítáno {len(months)} měsíců")
+                    with st.spinner("Počítám bonusy..."):
+                        for month in months:
+                            db.calculate_monthly_kpi_evaluation(month)
+                            db.calculate_department_summary(month)
+                    st.success(f"✅ Úspěšně přepočítáno {len(months)} měsíců!")
                     st.rerun()
                 else:
                     st.warning("Žádná data k přepočítání")
 
         with col2:
-            st.caption("💡 Použijte pokud se nezobrazují správné bonusy")
+            st.caption("💡 Použijte pokud:")
+            st.caption("• Se nezobrazují bonusy")
+            st.caption("• Změnili jste hranice KPI")
+            st.caption("• Přidali jste nová data")
+
+        conn.close()
