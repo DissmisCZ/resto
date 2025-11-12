@@ -824,7 +824,7 @@ elif page == "📝 Zadání dat":
 elif page == "⚙️ Admin":
     st.title("⚙️ Admin Panel")
 
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Oddělení", "Lokality", "Provozní", "KPI Definice", "KPI Hranice"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Oddělení", "Lokality", "Provozní", "KPI Definice", "KPI Hranice", "🔍 Debug"])
 
     # TAB 1: Departments
     with tab1:
@@ -1169,6 +1169,56 @@ elif page == "⚙️ Admin":
                     st.error(msg)
 
             st.markdown("---")
+            st.markdown("#### ✏️ Upravit existující hranici")
+            if not thresholds.empty:
+                col1, col2 = st.columns(2)
+                with col1:
+                    threshold_edit_descriptions = [f"{row['operator']} {row['min_hodnota']}" +
+                                                  (f" - {row['max_hodnota']}" if pd.notna(row['max_hodnota']) else "") +
+                                                  f" → {row['bonus_procento']}%"
+                                                  for _, row in thresholds.iterrows()]
+                    edit_threshold_idx = st.selectbox("Vyberte hranici k úpravě:",
+                                                     range(len(threshold_edit_descriptions)),
+                                                     format_func=lambda x: threshold_edit_descriptions[x],
+                                                     key="edit_threshold_select")
+                    edit_threshold_data = thresholds.iloc[edit_threshold_idx]
+                    edit_threshold_id = edit_threshold_data['id']
+
+                with col2:
+                    st.caption(f"Úprava hranice: **{threshold_edit_descriptions[edit_threshold_idx]}**")
+
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    edit_op = st.selectbox("Operátor:", ["≥", "≤", ">", "<", "mezi"],
+                                          index=["≥", "≤", ">", "<", "mezi"].index(edit_threshold_data['operator']) if edit_threshold_data['operator'] in ["≥", "≤", ">", "<", "mezi"] else 0,
+                                          key="edit_threshold_op")
+                with col2:
+                    edit_min = st.number_input("Min hodnota:", value=float(edit_threshold_data['min_hodnota'] or 0.0), key="edit_threshold_min")
+                with col3:
+                    if edit_op == "mezi":
+                        edit_max = st.number_input("Max hodnota:", value=float(edit_threshold_data['max_hodnota'] or 100.0), key="edit_threshold_max")
+                    else:
+                        edit_max = None
+                        st.caption(f"Max: {edit_threshold_data['max_hodnota'] if pd.notna(edit_threshold_data['max_hodnota']) else 'N/A'}")
+                with col4:
+                    edit_bonus = st.number_input("Bonus %:", min_value=0.0, max_value=100.0,
+                                                 value=float(edit_threshold_data['bonus_procento']), key="edit_threshold_bonus")
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    edit_desc = st.text_input("Popis:", value=edit_threshold_data['popis'] or "", key="edit_threshold_popis")
+                with col2:
+                    edit_poradi = st.number_input("Pořadí:", min_value=1, value=int(edit_threshold_data['poradi'] or 1), key="edit_threshold_poradi")
+
+                if st.button("✏️ Uložit změny hranice", key="save_threshold_btn"):
+                    success, msg = db.update_kpi_threshold(edit_threshold_id, edit_min, edit_max, edit_op, edit_bonus, edit_desc, edit_poradi)
+                    if success:
+                        st.success(msg)
+                        st.rerun()
+                    else:
+                        st.error(msg)
+
+            st.markdown("---")
             st.markdown("#### 🗑️ Smazat hranici")
             if not thresholds.empty:
                 col1, col2 = st.columns(2)
@@ -1190,3 +1240,123 @@ elif page == "⚙️ Admin":
                             st.rerun()
                         else:
                             st.error(msg)
+
+    # TAB 6: Debug & Diagnostics
+    with tab6:
+        st.markdown("### 🔍 Diagnostika Databáze")
+        st.info("📊 Přehled dat v databázi - pomáhá identifikovat problémy")
+
+        # Get database statistics
+        conn = db.get_connection()
+        cursor = conn.cursor()
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.markdown("#### 📁 Základní tabulky")
+            cursor.execute("SELECT COUNT(*) FROM departments WHERE aktivni = 1")
+            dept_count = cursor.fetchone()[0]
+            st.metric("Oddělení", dept_count)
+
+            cursor.execute("SELECT COUNT(*) FROM locations WHERE aktivni = 1")
+            loc_count = cursor.fetchone()[0]
+            st.metric("Lokality", loc_count)
+
+            cursor.execute("SELECT COUNT(*) FROM operational_managers WHERE aktivni = 1")
+            mgr_count = cursor.fetchone()[0]
+            st.metric("Provozní", mgr_count)
+
+        with col2:
+            st.markdown("#### 📊 KPI")
+            cursor.execute("SELECT COUNT(*) FROM kpi_definitions WHERE aktivni = 1")
+            kpi_count = cursor.fetchone()[0]
+            st.metric("KPI Definice", kpi_count)
+
+            cursor.execute("SELECT COUNT(*) FROM kpi_thresholds")
+            threshold_count = cursor.fetchone()[0]
+            st.metric("KPI Hranice", threshold_count)
+
+        with col3:
+            st.markdown("#### 💾 Data")
+            cursor.execute("SELECT COUNT(*) FROM monthly_kpi_data WHERE status = 'ACTIVE'")
+            data_count = cursor.fetchone()[0]
+            st.metric("Měsíční data (lokality)", data_count)
+
+            cursor.execute("SELECT COUNT(*) FROM monthly_department_kpi_data WHERE status = 'ACTIVE'")
+            dept_data_count = cursor.fetchone()[0]
+            st.metric("Měsíční data (oddělení)", dept_data_count)
+
+            cursor.execute("SELECT COUNT(*) FROM monthly_kpi_evaluation")
+            eval_count = cursor.fetchone()[0]
+            st.metric("Vyhodnocení bonusů", eval_count)
+
+        st.markdown("---")
+        st.markdown("#### 📋 Ukázková Data")
+
+        # Show sample data
+        st.markdown("**Oddělení:**")
+        cursor.execute("SELECT nazev, vedouci, ma_vlastni_kpi FROM departments WHERE aktivni = 1 LIMIT 5")
+        depts_data = cursor.fetchall()
+        if depts_data:
+            st.write(pd.DataFrame(depts_data, columns=['Název', 'Vedoucí', 'Vlastní KPI']))
+        else:
+            st.warning("⚠️ Žádná oddělení!")
+
+        st.markdown("**Lokality:**")
+        cursor.execute("""
+            SELECT l.nazev, d.nazev as oddeleni
+            FROM locations l
+            JOIN departments d ON l.department_id = d.id
+            WHERE l.aktivni = 1
+            LIMIT 5
+        """)
+        locs_data = cursor.fetchall()
+        if locs_data:
+            st.write(pd.DataFrame(locs_data, columns=['Lokalita', 'Oddělení']))
+        else:
+            st.warning("⚠️ Žádné lokality!")
+
+        st.markdown("**KPI Definice:**")
+        cursor.execute("SELECT nazev, jednotka, typ_vypoctu FROM kpi_definitions WHERE aktivni = 1 LIMIT 5")
+        kpis_data = cursor.fetchall()
+        if kpis_data:
+            st.write(pd.DataFrame(kpis_data, columns=['Název', 'Jednotka', 'Typ']))
+        else:
+            st.warning("⚠️ Žádná KPI!")
+
+        st.markdown("**Měsíční Data (poslední záznamy):**")
+        cursor.execute("""
+            SELECT m.mesic, l.nazev as lokalita, k.nazev as kpi, m.hodnota
+            FROM monthly_kpi_data m
+            JOIN locations l ON m.location_id = l.id
+            JOIN kpi_definitions k ON m.kpi_id = k.id
+            WHERE m.status = 'ACTIVE'
+            ORDER BY m.created_at DESC
+            LIMIT 10
+        """)
+        monthly_data = cursor.fetchall()
+        if monthly_data:
+            st.write(pd.DataFrame(monthly_data, columns=['Měsíc', 'Lokalita', 'KPI', 'Hodnota']))
+        else:
+            st.warning("⚠️ Žádná měsíční data! Začněte zadávat v 'Zadání dat'")
+
+        conn.close()
+
+        st.markdown("---")
+        st.markdown("#### 🔄 Akce")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("♻️ Přepočítat všechny bonusy", key="recalc_all_btn"):
+                months = db.get_all_months_with_data()
+                if months:
+                    for month in months:
+                        db.calculate_monthly_kpi_evaluation(month)
+                        db.calculate_department_summary(month)
+                    st.success(f"✅ Přepočítáno {len(months)} měsíců")
+                    st.rerun()
+                else:
+                    st.warning("Žádná data k přepočítání")
+
+        with col2:
+            st.caption("💡 Použijte pokud se nezobrazují správné bonusy")
