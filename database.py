@@ -20,6 +20,8 @@ def get_connection():
     """Get database connection"""
     conn = sqlite3.connect(DATABASE_FILE, check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    # Force integer detection for foreign keys
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 def init_database():
@@ -1274,6 +1276,85 @@ def get_departments_with_vlastni_kpi():
     return df
 
 # ============ CLEANUP FUNCTIONS ============
+
+def fix_binary_ids():
+    """Fix binary location_id and kpi_id in monthly_kpi_data table"""
+    conn = sqlite3.connect(DATABASE_FILE, check_same_thread=False)
+    # Don't use Row factory for this operation
+    cursor = conn.cursor()
+
+    try:
+        fixed_count = 0
+
+        # Get all records with their raw data
+        cursor.execute("SELECT id, location_id, kpi_id FROM monthly_kpi_data")
+        records = cursor.fetchall()
+
+        for record in records:
+            record_id, location_id, kpi_id = record
+            fixed = False
+
+            # Convert binary location_id to integer if needed
+            if isinstance(location_id, bytes):
+                # Try to convert bytes to integer (little-endian)
+                try:
+                    location_id_int = int.from_bytes(location_id, byteorder='little')
+                    cursor.execute("UPDATE monthly_kpi_data SET location_id = ? WHERE id = ?",
+                                 (location_id_int, record_id))
+                    fixed = True
+                except:
+                    pass
+
+            # Convert binary kpi_id to integer if needed
+            if isinstance(kpi_id, bytes):
+                try:
+                    kpi_id_int = int.from_bytes(kpi_id, byteorder='little')
+                    cursor.execute("UPDATE monthly_kpi_data SET kpi_id = ? WHERE id = ?",
+                                 (kpi_id_int, record_id))
+                    fixed = True
+                except:
+                    pass
+
+            if fixed:
+                fixed_count += 1
+
+        # Do the same for monthly_department_kpi_data if it exists
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='monthly_department_kpi_data'")
+        if cursor.fetchone():
+            cursor.execute("SELECT id, department_id, kpi_id FROM monthly_department_kpi_data")
+            dept_records = cursor.fetchall()
+
+            for record in dept_records:
+                record_id, department_id, kpi_id = record
+                fixed = False
+
+                if isinstance(department_id, bytes):
+                    try:
+                        dept_id_int = int.from_bytes(department_id, byteorder='little')
+                        cursor.execute("UPDATE monthly_department_kpi_data SET department_id = ? WHERE id = ?",
+                                     (dept_id_int, record_id))
+                        fixed = True
+                    except:
+                        pass
+
+                if isinstance(kpi_id, bytes):
+                    try:
+                        kpi_id_int = int.from_bytes(kpi_id, byteorder='little')
+                        cursor.execute("UPDATE monthly_department_kpi_data SET kpi_id = ? WHERE id = ?",
+                                     (kpi_id_int, record_id))
+                        fixed = True
+                    except:
+                        pass
+
+                if fixed:
+                    fixed_count += 1
+
+        conn.commit()
+        conn.close()
+        return True, f"Opraveno {fixed_count} záznamů s binárními ID"
+    except Exception as e:
+        conn.close()
+        return False, f"Chyba: {str(e)}"
 
 def cleanup_duplicates():
     """Remove duplicate entries from database"""

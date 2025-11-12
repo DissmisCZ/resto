@@ -1415,6 +1415,25 @@ elif page == "⚙️ Admin":
             st.warning(f"⚠️ Počet dat ({data_count}) neodpovídá počtu vyhodnocení ({eval_count}). Přepočítejte bonusy.")
 
         st.markdown("---")
+        st.markdown("#### 🔧 Opravy databáze")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🔧 OPRAVIT BINÁRNÍ ID", key="fix_binary_btn", type="secondary"):
+                with st.spinner("Opravuji datové typy..."):
+                    success, msg = db.fix_binary_ids()
+                if success:
+                    st.success(f"✅ {msg}")
+                    st.info("💡 Nyní klikněte na 'Přepočítat bonusy' níže")
+                else:
+                    st.error(f"❌ {msg}")
+
+        with col2:
+            st.caption("🔧 Opraví location_id z binárního formátu")
+            st.caption("Použijte pokud vidíte chybu:")
+            st.caption("'Lokalita ID b'\\x02...' NEEXISTUJE!'")
+
+        st.markdown("---")
         st.markdown("#### 🔄 Akce")
 
         col1, col2 = st.columns(2)
