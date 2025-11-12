@@ -524,6 +524,27 @@ def add_monthly_kpi_data(mesic, location_id, kpi_id, hodnota, poznamka=None, zdr
     conn = get_connection()
     cursor = conn.cursor()
     try:
+        # Ensure IDs are integers, not bytes
+        if isinstance(location_id, bytes):
+            location_id = int.from_bytes(location_id, byteorder='little')
+        if isinstance(kpi_id, bytes):
+            kpi_id = int.from_bytes(kpi_id, byteorder='little')
+
+        # Convert to int to be safe
+        location_id = int(location_id)
+        kpi_id = int(kpi_id)
+
+        # Verify location and KPI exist
+        cursor.execute("SELECT id FROM locations WHERE id = ? AND aktivni = 1", (location_id,))
+        if not cursor.fetchone():
+            conn.close()
+            return False, f"Lokalita ID {location_id} neexistuje nebo není aktivní"
+
+        cursor.execute("SELECT id FROM kpi_definitions WHERE id = ? AND aktivni = 1", (kpi_id,))
+        if not cursor.fetchone():
+            conn.close()
+            return False, f"KPI ID {kpi_id} neexistuje nebo není aktivní"
+
         cursor.execute("""
             INSERT INTO monthly_kpi_data
             (mesic, location_id, kpi_id, hodnota, poznamka, zdroj, status, updated_at)

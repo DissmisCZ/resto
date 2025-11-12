@@ -565,6 +565,20 @@ elif page == "📝 Zadání dat":
         st.markdown("---")
         location_id = locations[locations['nazev'] == selected_location]['id'].values[0]
 
+        # Debug: Show location ID
+        with st.expander("🔍 Debug Info"):
+            st.code(f"Lokalita: {selected_location}\nLocation ID: {location_id} (typ: {type(location_id).__name__})")
+            # Show if location exists in DB
+            conn = db.get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, nazev, aktivni FROM locations WHERE id = ?", (int(location_id),))
+            loc_check = cursor.fetchone()
+            if loc_check:
+                st.success(f"✅ Lokalita nalezena v DB: {loc_check['nazev']} (aktivni={loc_check['aktivni']})")
+            else:
+                st.error(f"❌ Lokalita ID {location_id} NEEXISTUJE v databázi!")
+            conn.close()
+
         # Get existing data for this month/location OR show zeros
         existing_data = db.get_monthly_kpi_by_location_month(selected_input_month, location_id)
 
@@ -1417,7 +1431,34 @@ elif page == "⚙️ Admin":
         st.markdown("---")
         st.markdown("#### 🔧 Opravy databáze")
 
-        col1, col2 = st.columns(2)
+        # Check for orphaned records
+        cursor.execute("""
+            SELECT DISTINCT m.location_id
+            FROM monthly_kpi_data m
+            WHERE m.location_id NOT IN (SELECT id FROM locations)
+            LIMIT 10
+        """)
+        orphaned_locations = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT DISTINCT m.kpi_id
+            FROM monthly_kpi_data m
+            WHERE m.kpi_id NOT IN (SELECT id FROM kpi_definitions)
+            LIMIT 10
+        """)
+        orphaned_kpis = cursor.fetchall()
+
+        if orphaned_locations or orphaned_kpis:
+            st.error("🚨 PROBLÉM: Nalezeny osiřelé záznamy!")
+            if orphaned_locations:
+                loc_ids = [str(row[0]) for row in orphaned_locations]
+                st.warning(f"⚠️ Měsíční data odkazují na neexistující lokality: {', '.join(loc_ids)}")
+            if orphaned_kpis:
+                kpi_ids = [str(row[0]) for row in orphaned_kpis]
+                st.warning(f"⚠️ Měsíční data odkazují na neexistující KPI: {', '.join(kpi_ids)}")
+            st.info("💡 Použijte tlačítko 'Vyčistit osiřelé záznamy' níže")
+
+        col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("🔧 OPRAVIT BINÁRNÍ ID", key="fix_binary_btn", type="secondary"):
                 with st.spinner("Opravuji datové typy..."):
@@ -1429,9 +1470,23 @@ elif page == "⚙️ Admin":
                     st.error(f"❌ {msg}")
 
         with col2:
-            st.caption("🔧 Opraví location_id z binárního formátu")
-            st.caption("Použijte pokud vidíte chybu:")
-            st.caption("'Lokalita ID b'\\x02...' NEEXISTUJE!'")
+            if st.button("🧹 VYČISTIT OSIŘELÉ", key="clean_orphaned_btn", type="secondary"):
+                with st.spinner("Čistím osiřelé záznamy..."):
+                    # Delete records with non-existent foreign keys
+                    cursor.execute("""
+                        DELETE FROM monthly_kpi_data
+                        WHERE location_id NOT IN (SELECT id FROM locations)
+                        OR kpi_id NOT IN (SELECT id FROM kpi_definitions)
+                    """)
+                    conn.commit()
+                    deleted = cursor.rowcount
+                st.success(f"✅ Smazáno {deleted} osiřelých záznamů")
+                st.rerun()
+
+        with col3:
+            st.caption("🔧 Tlačítka pro opravy:")
+            st.caption("• Binární ID → Integer")
+            st.caption("• Osiřelé → Smazat")
 
         st.markdown("---")
         st.markdown("#### 🔄 Akce")
