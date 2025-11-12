@@ -193,6 +193,12 @@ def insert_default_data():
     conn = get_connection()
     cursor = conn.cursor()
 
+    # Check if data already exists - skip if yes
+    cursor.execute("SELECT COUNT(*) FROM departments")
+    if cursor.fetchone()[0] > 0:
+        conn.close()
+        return  # Data already exists, skip
+
     # === INSERT DEPARTMENTS (OPRAVA: Bouda a Bistro jsou oddělení) ===
     departments = [
         ("Bouda", "Oddělení Bouda - Mercury & OC4Dvory", "Matěj, Thomas"),
@@ -1266,3 +1272,60 @@ def get_departments_with_vlastni_kpi():
     """, conn)
     conn.close()
     return df
+
+# ============ CLEANUP FUNCTIONS ============
+
+def cleanup_duplicates():
+    """Remove duplicate entries from database"""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Clean duplicate departments - keep only the first one
+        cursor.execute("""
+            DELETE FROM departments
+            WHERE id NOT IN (
+                SELECT MIN(id)
+                FROM departments
+                GROUP BY nazev
+            )
+        """)
+
+        # Clean duplicate locations
+        cursor.execute("""
+            DELETE FROM locations
+            WHERE id NOT IN (
+                SELECT MIN(id)
+                FROM locations
+                GROUP BY nazev
+            )
+        """)
+
+        # Clean duplicate operational managers
+        cursor.execute("""
+            DELETE FROM operational_managers
+            WHERE id NOT IN (
+                SELECT MIN(id)
+                FROM operational_managers
+                GROUP BY jmeno, department_id
+            )
+        """)
+
+        # Clean duplicate KPI definitions
+        cursor.execute("""
+            DELETE FROM kpi_definitions
+            WHERE id NOT IN (
+                SELECT MIN(id)
+                FROM kpi_definitions
+                GROUP BY nazev
+            )
+        """)
+
+        conn.commit()
+        cursor.execute("SELECT changes()")
+        deleted_count = cursor.fetchone()[0]
+        conn.close()
+        return True, f"Vyčištěno {deleted_count} duplikátů"
+    except Exception as e:
+        conn.close()
+        return False, str(e)

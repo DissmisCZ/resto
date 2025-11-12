@@ -903,6 +903,17 @@ elif page == "⚙️ Admin":
             st.warning("Žádná oddělení k nastavení")
 
         st.markdown("---")
+        st.markdown("#### 🧹 Vyčistit duplikáty")
+        st.warning("⚠️ Použijte pokud vidíte duplicitní záznamy (stejné oddělení/lokality/provozní více krát)")
+        if st.button("🧹 Vyčistit databázi", type="secondary", key="cleanup_db_btn"):
+            success, msg = db.cleanup_duplicates()
+            if success:
+                st.success(msg)
+                st.rerun()
+            else:
+                st.error(msg)
+
+        st.markdown("---")
         st.markdown("#### 🗑️ Smazat oddělení")
         col1, col2 = st.columns(2)
         with col1:
