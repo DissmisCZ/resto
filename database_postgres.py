@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import io
 import streamlit as st
+from functools import lru_cache
 
 def get_connection():
     """Get PostgreSQL database connection from Streamlit secrets"""
@@ -324,6 +325,7 @@ def insert_default_data():
 
 # ============ DEPARTMENTS FUNCTIONS ============
 
+@st.cache_data(ttl=300)  # Cache for 5 minutes
 def get_departments():
     """Get all active departments"""
     conn = get_connection()
@@ -356,6 +358,7 @@ def add_department(nazev, vedouci=None, popis=None):
 
 # ============ LOCATIONS FUNCTIONS ============
 
+@st.cache_data(ttl=300)  # Cache for 5 minutes
 def get_locations():
     """Get all active locations with department info"""
     conn = get_connection()
@@ -422,6 +425,7 @@ def update_location_department(location_id, department_id):
 
 # ============ OPERATIONAL MANAGERS FUNCTIONS ============
 
+@st.cache_data(ttl=300)  # Cache for 5 minutes
 def get_operational_managers():
     """Get all active operational managers"""
     conn = get_connection()
@@ -512,6 +516,7 @@ def set_manager_kpis(manager_id, kpi_ids):
 
 # ============ KPI DEFINITIONS & THRESHOLDS ============
 
+@st.cache_data(ttl=300)  # Cache for 5 minutes
 def get_kpi_definitions():
     """Get all active KPI definitions"""
     conn = get_connection()
