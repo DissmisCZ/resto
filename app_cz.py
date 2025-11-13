@@ -77,70 +77,57 @@ if not st.session_state.authenticated:
 # MAIN APPLICATION
 # ============================================================================
 
-# Theme CSS
-theme_class = "dark-mode" if st.session_state.get('dark_mode', True) else "light-mode"
-st.markdown(f"""
+# Theme CSS - apply directly based on dark_mode setting
+is_dark = st.session_state.get('dark_mode', True)
+
+if is_dark:
+    # Dark mode
+    st.markdown("""
 <style>
-/* Light/Dark mode variables */
-.light-mode {{
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fa;
-    --text-primary: #1a1a1a;
-    --text-secondary: #6c757d;
-    --border-color: #dee2e6;
-    --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}}
+html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
+    background-color: #0e1117 !important;
+    color: #fafafa !important;
+}
 
-.dark-mode {{
-    --bg-primary: #0e1117;
-    --bg-secondary: #262730;
-    --text-primary: #fafafa;
-    --text-secondary: #a0a0a0;
-    --border-color: #30363d;
-    --card-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}}
+[data-testid="stSidebar"] {
+    background-color: #262730 !important;
+    border-right: 1px solid #30363d;
+}
 
-/* Apply theme */
-html, body, [data-testid="stAppViewContainer"] {{
-    background-color: var(--bg-primary) !important;
-    color: var(--text-primary) !important;
-}}
-
-[data-testid="stSidebar"] {{
-    background-color: var(--bg-secondary) !important;
-    border-right: 1px solid var(--border-color);
-}}
+[data-testid="stHeader"] {
+    background-color: #0e1117 !important;
+}
 
 /* Metric cards */
-.metric-card {{
+.metric-card {
     background: linear-gradient(135deg, #1f77b4 0%, #2a8fbc 100%);
     padding: 20px;
     border-radius: 8px;
     color: white;
     text-align: center;
     margin-bottom: 15px;
-    box-shadow: var(--card-shadow);
-}}
-.metric-card h2 {{
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.metric-card h2 {
     margin: 0;
     font-size: 2.5em;
     font-weight: bold;
-}}
-.metric-card p {{
+}
+.metric-card p {
     margin: 5px 0 0 0;
     font-size: 1.1em;
     opacity: 0.95;
-}}
-.metric-good {{
+}
+.metric-good {
     background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
-}}
-.metric-bad {{
+}
+.metric-bad {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-}}
-.metric-medium {{
+}
+.metric-medium {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-}}
-.success-banner {{
+}
+.success-banner {
     background-color: #22c55e;
     color: white;
     padding: 15px;
@@ -149,26 +136,101 @@ html, body, [data-testid="stAppViewContainer"] {{
     text-align: center;
     font-weight: bold;
     font-size: 1.1em;
-}}
+}
 
 /* Tables */
-[data-testid="stDataFrame"] {{
+[data-testid="stDataFrame"] {
     background-color: rgba(255,255,255,0.05);
     border-radius: 8px;
     padding: 10px;
-}}
+}
 
 /* Selectbox - jen dropdown */
-[data-baseweb="select"] input {{
+[data-baseweb="select"] input {
     pointer-events: none;
     cursor: pointer;
     caret-color: transparent;
-}}
-[data-baseweb="select"] {{
+}
+[data-baseweb="select"] {
     cursor: pointer;
-}}
+}
 </style>
-<div class="{theme_class}"></div>
+""", unsafe_allow_html=True)
+else:
+    # Light mode
+    st.markdown("""
+<style>
+html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
+    background-color: #ffffff !important;
+    color: #1a1a1a !important;
+}
+
+[data-testid="stSidebar"] {
+    background-color: #f8f9fa !important;
+    border-right: 1px solid #dee2e6;
+}
+
+[data-testid="stHeader"] {
+    background-color: #ffffff !important;
+}
+
+/* Metric cards */
+.metric-card {
+    background: linear-gradient(135deg, #1f77b4 0%, #2a8fbc 100%);
+    padding: 20px;
+    border-radius: 8px;
+    color: white;
+    text-align: center;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.metric-card h2 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: bold;
+}
+.metric-card p {
+    margin: 5px 0 0 0;
+    font-size: 1.1em;
+    opacity: 0.95;
+}
+.metric-good {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+}
+.metric-bad {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+}
+.metric-medium {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+}
+.success-banner {
+    background-color: #22c55e;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* Tables */
+[data-testid="stDataFrame"] {
+    background-color: rgba(0,0,0,0.02);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+/* Selectbox - jen dropdown */
+[data-baseweb="select"] input {
+    pointer-events: none;
+    cursor: pointer;
+    caret-color: transparent;
+}
+[data-baseweb="select"] {
+    cursor: pointer;
+}
+</style>
 """, unsafe_allow_html=True)
 
 # Init DB
