@@ -163,19 +163,17 @@ if 'save_message' not in st.session_state:
     st.session_state.save_message = None
 if 'save_message_type' not in st.session_state:
     st.session_state.save_message_type = None
-if 'category' not in st.session_state:
-    st.session_state.category = "Provozní KPI"
 
 # SIDEBAR
 with st.sidebar:
     st.title("🍽️ RESTO v3")
 
     # Category selector
-    category = st.selectbox("📁 Kategorie:", [
+    category = st.radio("📁 Kategorie", [
         "Provozní KPI",
         "Marketing KPI",
         "⚙️ Admin"
-    ], key="category_select")
+    ], horizontal=False)
 
     st.markdown("---")
 
