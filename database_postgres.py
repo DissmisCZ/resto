@@ -208,8 +208,9 @@ def insert_default_data():
     cursor = conn.cursor()
 
     # Check if data already exists - skip if yes
-    cursor.execute("SELECT COUNT(*) FROM departments")
-    if cursor.fetchone()[0] > 0:
+    cursor.execute("SELECT COUNT(*) as count FROM departments")
+    result = cursor.fetchone()
+    if result['count'] > 0:
         cursor.close()
         conn.close()
         return  # Data already exists, skip
@@ -231,7 +232,7 @@ def insert_default_data():
     # === INSERT LOCATIONS (Bound to departments) ===
     cursor.execute("SELECT id, nazev FROM departments ORDER BY id")
     depts = cursor.fetchall()
-    dept_map = {row[1]: row[0] for row in depts}  # nazev -> id
+    dept_map = {row['nazev']: row['id'] for row in depts}  # nazev -> id
 
     locations = [
         ("Mercury", "Bouda"),           # Mercury patří do oddělení Bouda
@@ -252,7 +253,7 @@ def insert_default_data():
     # === INSERT OPERATIONAL MANAGERS (OPRAVA: přiřazeni oddělení!) ===
     cursor.execute("SELECT id, nazev FROM departments ORDER BY id")
     depts = cursor.fetchall()
-    dept_map = {row[1]: row[0] for row in depts}
+    dept_map = {row['nazev']: row['id'] for row in depts}
 
     operational_mgrs = [
         ("Matěj", "Bouda"),             # Matěj provozní v Boudě
@@ -463,7 +464,7 @@ def add_operational_manager(jmeno, department_id, email=None):
             VALUES (%s, %s, %s)
             RETURNING id
         """, (jmeno, department_id, email))
-        new_id = cursor.fetchone()[0]
+        new_id = cursor.fetchone()['id']
         conn.commit()
         cursor.close()
         conn.close()
@@ -879,7 +880,7 @@ def calculate_department_summary(mesic):
             total_met = 0
 
             for loc_row in locations:
-                loc_id = loc_row[0]
+                loc_id = loc_row['id']
 
                 cursor.execute("""
                     SELECT
@@ -1037,10 +1038,10 @@ def delete_department(department_id):
     cursor = conn.cursor()
     try:
         # Check if department has locations or managers
-        cursor.execute("SELECT COUNT(*) FROM locations WHERE department_id = %s AND aktivni = TRUE", (department_id,))
-        loc_count = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM operational_managers WHERE department_id = %s AND aktivni = TRUE", (department_id,))
-        mgr_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) as count FROM locations WHERE department_id = %s AND aktivni = TRUE", (department_id,))
+        loc_count = cursor.fetchone()['count']
+        cursor.execute("SELECT COUNT(*) as count FROM operational_managers WHERE department_id = %s AND aktivni = TRUE", (department_id,))
+        mgr_count = cursor.fetchone()['count']
 
         if loc_count > 0 or mgr_count > 0:
             cursor.close()
@@ -1095,16 +1096,17 @@ def add_kpi_definition(nazev, popis=None, jednotka=None, typ_vypoctu=None, porad
     cursor = conn.cursor()
     try:
         if poradi is None:
-            cursor.execute("SELECT MAX(poradi) FROM kpi_definitions")
-            max_poradi = cursor.fetchone()[0]
-            poradi = (max_poradi or 0) + 1
+            cursor.execute("SELECT MAX(poradi) as max FROM kpi_definitions")
+            result = cursor.fetchone()
+            max_poradi = result['max'] if result['max'] is not None else 0
+            poradi = max_poradi + 1
 
         cursor.execute("""
             INSERT INTO kpi_definitions (nazev, popis, jednotka, typ_vypoctu, poradi)
             VALUES (%s, %s, %s, %s, %s)
             RETURNING id
         """, (nazev, popis, jednotka, typ_vypoctu, poradi))
-        new_id = cursor.fetchone()[0]
+        new_id = cursor.fetchone()['id']
         conn.commit()
         cursor.close()
         conn.close()
@@ -1199,16 +1201,17 @@ def add_kpi_threshold(kpi_id, operator, bonus_procento, min_hodnota=None, max_ho
             return False, f"KPI ID {kpi_id} neexistuje nebo není aktivní", None
 
         if poradi is None:
-            cursor.execute("SELECT MAX(poradi) FROM kpi_thresholds WHERE kpi_id = %s", (kpi_id,))
-            max_poradi = cursor.fetchone()[0]
-            poradi = (max_poradi or 0) + 1
+            cursor.execute("SELECT MAX(poradi) as max FROM kpi_thresholds WHERE kpi_id = %s", (kpi_id,))
+            result = cursor.fetchone()
+            max_poradi = result['max'] if result['max'] is not None else 0
+            poradi = max_poradi + 1
 
         cursor.execute("""
             INSERT INTO kpi_thresholds (kpi_id, min_hodnota, max_hodnota, operator, bonus_procento, popis, poradi)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """, (kpi_id, min_hodnota, max_hodnota, operator, bonus_procento, popis, poradi))
-        new_id = cursor.fetchone()[0]
+        new_id = cursor.fetchone()['id']
         conn.commit()
         cursor.close()
         conn.close()
