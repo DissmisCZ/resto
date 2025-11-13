@@ -24,39 +24,88 @@ if 'authenticated' not in st.session_state:
 if not st.session_state.authenticated:
     st.markdown("""
     <style>
-    .login-container {
-        max-width: 400px;
-        margin: 100px auto;
-        padding: 40px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    /* Login page styles */
+    .login-page {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+    }
+    .login-card {
+        background: white;
+        max-width: 450px;
+        width: 100%;
+        padding: 50px 40px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        text-align: center;
+    }
+    .login-logo {
+        width: 180px;
+        height: 180px;
+        margin: 0 auto 30px;
+    }
+    .login-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
     }
     .login-title {
-        color: white;
-        text-align: center;
-        font-size: 32px;
-        margin-bottom: 30px;
+        color: #1e3c72;
+        font-size: 28px;
         font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .login-subtitle {
+        color: #6c757d;
+        font-size: 16px;
+        margin-bottom: 35px;
+    }
+    .stTextInput > div > div > input {
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        padding: 12px 15px;
+        font-size: 16px;
+    }
+    .stTextInput > div > div > input:focus {
+        border-color: #2a5298;
+        box-shadow: 0 0 0 2px rgba(42,82,152,0.1);
+    }
+    .stButton > button {
+        border-radius: 10px;
+        padding: 12px 30px;
+        font-size: 16px;
+        font-weight: 600;
+        margin-top: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="login-container">', unsafe_allow_html=True)
-    st.markdown('<div class="login-title">🍽️ RESTO v3</div>', unsafe_allow_html=True)
-    st.markdown('<p style="color: white; text-align: center; margin-bottom: 30px;">Přihlaste se pro přístup k aplikaci</p>', unsafe_allow_html=True)
-
-    # Try to get password from secrets, fallback to demo password
-    try:
-        correct_password = st.secrets["passwords"]["admin"]
-    except:
-        correct_password = "resto2025"  # Default password if secrets not configured
-        st.info("⚠️ Používá se výchozí heslo. Pro produkci nastavte heslo v secrets!")
-
-    password = st.text_input("Heslo:", type="password", key="login_password")
-
+    # Center everything
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
+        # Logo
+        try:
+            st.image("assets/logo.png", width=180)
+        except:
+            st.markdown('<div style="text-align: center; font-size: 80px; margin-bottom: 20px;">🍔</div>', unsafe_allow_html=True)
+
+        # Title
+        st.markdown('<div class="login-title">Bouda Burgers</div>', unsafe_allow_html=True)
+        st.markdown('<div class="login-subtitle">KPI Dashboard - Přihlášení</div>', unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        # Try to get password from secrets, fallback to demo password
+        try:
+            correct_password = st.secrets["passwords"]["admin"]
+        except:
+            correct_password = "resto2025"  # Default password if secrets not configured
+            st.warning("⚠️ Používá se výchozí heslo")
+
+        password = st.text_input("🔒 Heslo", type="password", key="login_password", label_visibility="collapsed", placeholder="Zadejte heslo")
+
         if st.button("🔓 Přihlásit se", use_container_width=True, type="primary"):
             if password == correct_password:
                 st.session_state.authenticated = True
@@ -65,11 +114,9 @@ if not st.session_state.authenticated:
             else:
                 st.error("❌ Nesprávné heslo!")
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # Show hint only in development
-    if correct_password == "resto2025":
-        st.markdown('<p style="text-align: center; margin-top: 20px; color: #666;">💡 Demo heslo: resto2025</p>', unsafe_allow_html=True)
+        # Show hint only in development
+        if correct_password == "resto2025":
+            st.markdown('<p style="text-align: center; margin-top: 25px; color: #999; font-size: 14px;">💡 Demo heslo: resto2025</p>', unsafe_allow_html=True)
 
     st.stop()
 
@@ -93,6 +140,29 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
 [data-testid="stSidebar"] {
     background-color: #262730 !important;
     border-right: 1px solid #30363d;
+}
+
+/* Compact sidebar */
+[data-testid="stSidebar"] .element-container {
+    margin-bottom: 0.5rem;
+}
+
+[data-testid="stSidebar"] .stRadio > div {
+    gap: 0.3rem;
+}
+
+[data-testid="stSidebar"] .stRadio label {
+    padding: 0.3rem 0;
+    font-size: 14px;
+}
+
+[data-testid="stSidebar"] .stSelectbox label {
+    font-size: 14px;
+    margin-bottom: 0.25rem;
+}
+
+[data-testid="stSidebar"] hr {
+    margin: 0.5rem 0;
 }
 
 [data-testid="stHeader"] {
@@ -257,6 +327,29 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
 [data-testid="stSidebar"] {
     background-color: #f8f9fa !important;
     border-right: 1px solid #dee2e6;
+}
+
+/* Compact sidebar */
+[data-testid="stSidebar"] .element-container {
+    margin-bottom: 0.5rem;
+}
+
+[data-testid="stSidebar"] .stRadio > div {
+    gap: 0.3rem;
+}
+
+[data-testid="stSidebar"] .stRadio label {
+    padding: 0.3rem 0;
+    font-size: 14px;
+}
+
+[data-testid="stSidebar"] .stSelectbox label {
+    font-size: 14px;
+    margin-bottom: 0.25rem;
+}
+
+[data-testid="stSidebar"] hr {
+    margin: 0.5rem 0;
 }
 
 [data-testid="stHeader"] {
@@ -457,9 +550,20 @@ if 'dark_mode' not in st.session_state:
 
 # SIDEBAR
 with st.sidebar:
-    st.title("🍽️ RESTO v3")
+    # Logo and title
+    col_logo, col_space = st.columns([1, 3])
+    with col_logo:
+        try:
+            st.image("assets/logo.png", width=60)
+        except:
+            st.markdown('<div style="font-size: 50px; text-align: center;">🍔</div>', unsafe_allow_html=True)
 
-    # Category selector
+    st.markdown('<h3 style="margin-top: -10px; font-size: 18px; font-weight: bold;">Bouda Burgers</h3>', unsafe_allow_html=True)
+    st.markdown('<p style="margin-top: -15px; font-size: 12px; color: #666;">KPI Dashboard v3</p>', unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Category selector - compact
     category = st.radio("📁 Kategorie", [
         "Provozní KPI",
         "Marketing KPI",
