@@ -1,8 +1,8 @@
-# RESTO v2 - KPI Dashboard
+# RESTO v3.1 - KPI Dashboard Bouda Burgers
 
-**Nezávislá webová aplikace pro správu měsíčních KPI v restauracích**
+**Moderní webová aplikace pro správu měsíčních KPI v restauracích**
 
-![Version](https://img.shields.io/badge/version-2.0-blue)
+![Version](https://img.shields.io/badge/version-3.1-blue)
 ![Python](https://img.shields.io/badge/python-3.8+-green)
 ![Streamlit](https://img.shields.io/badge/streamlit-1.28+-orange)
 ![Status](https://img.shields.io/badge/status-production-brightgreen)
@@ -12,129 +12,220 @@
 ## 📋 Obsah
 
 1. [O projektu](#o-projektu)
-2. [Instalace](#instalace)
-3. [Spuštění](#spuštění)
-4. [Funkce](#funkce)
-5. [Struktura dat](#struktura-dat)
-6. [Užívání](#užívání)
-7. [Troubleshooting](#troubleshooting)
+2. [Nové ve v3.1](#nové-ve-v31)
+3. [Instalace](#instalace)
+4. [Spuštění](#spuštění)
+5. [Funkce](#funkce)
+6. [Autentizace](#autentizace)
+7. [Struktura dat](#struktura-dat)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
 ## O projektu
 
-RESTO v2 je **kompletně nezávislá** aplikace na Excelu pro správu operačních KPI restaurací.
+RESTO v3.1 je **kompletně nezávislá** aplikace pro správu operačních KPI restaurací Bouda Burgers s moderním designem a pokročilými funkcemi.
 
 ### Klíčové rysy:
-- ✅ **Měsíční KPI tracking** (ne denní)
+- ✅ **Autentizace** - zabezpečené přihlášení
+- ✅ **Light/Dark Mode** - přepínání barevných režimů
+- ✅ **Moderní UI** - gradient nadpisy, karty s animacemi
+- ✅ **Logo Bouda Burgers** - branding na login i v sidebaru
+- ✅ **Měsíční KPI tracking**
 - ✅ **Oddělení** (Matějovo, Thomasovo, Michaelovo)
 - ✅ **Lokality** (Mercury, OC4Dvory, Bouda, Bistro)
-- ✅ **Provozní manažeři**
-- ✅ **10 KPI metriky** s automatickými bonusy
-- ✅ **Dark theme** design
+- ✅ **Provozní manažeři** s přiřazením KPI
+- ✅ **Dynamické KPI hranice** s bonusovým systémem
+- ✅ **Porovnání měsíců** - trend analýza
+- ✅ **Kompaktní sidebar** - vejde se na jeden screen
 - ✅ **Import/Export** CSV data
-- ✅ **Detailní porovnání** lokalit
-- ✅ **Agregace bonusů** na úrovni oddělení
+- ✅ **Marketing KPI** placeholder
+
+---
+
+## Nové ve v3.1
+
+### 🔐 Autentizace
+- Zabezpečené přihlášení s heslem
+- Konfigurace hesla přes `.streamlit/secrets.toml`
+- Session management
+
+### 🎨 Moderní Design
+- **Light/Dark Mode** - přepínací tlačítka ☀️ | 🌙
+- Gradient nadpisy (purple/violet)
+- Karty s hover efekty a animacemi
+- Shadows a smooth transitions
+- Bílé pozadí (light) / Tmavé pozadí (dark)
+
+### 🏢 Logo & Branding
+- Logo Bouda Burgers na login page (180px)
+- Logo v sidebaru (45px)
+- Konzistentní branding napříč aplikací
+
+### 📱 Kompaktní Sidebar
+- Větší text (15px) pro lepší čitelnost
+- Radio buttony zarovnané s textem (18px × 18px)
+- Menší mezery (0.15rem gap)
+- Vše se vejde na jeden screen
+
+### 🎯 KPI Management
+- **Přiřazení KPI k manažerům** - checkboxy pro výběr
+- **Dynamické hranice KPI** - přidávání/editace/mazání
+- **Bonusový systém** - procenta podle splnění
+
+### 📊 Pokročilé Funkce
+- **Porovnání měsíců** - selectbox pro výběr srovnávacího měsíce
+- **Marketing KPI** - placeholder pro budoucí rozšíření
+- **Binary ID fix** - opraveny všechny databázové ID konflikty
 
 ---
 
 ## Instalace
 
 ### Systemové Požadavky
-- Windows 7+
-- Python 3.8+ (ze https://python.org)
+- Windows 7+ / Linux / macOS
+- Python 3.8+ (z https://python.org)
 
 ### Krok 1: Instalace Python Balíků
 
-Dvakrát kliknout na soubor:
-```
+**Windows:**
+```bash
 install_dependencies.bat
 ```
 
-Nebo ručně v Command Prompt (cmd):
+**Linux/macOS:**
 ```bash
 pip install -r requirements.txt
 ```
-
-Okno se zavře automaticky po dobu instalace.
 
 ---
 
 ## Spuštění
 
-### Testovací Spuštění (Fresh Database)
-Dvakrát kliknout na:
-```
-run_resto_test.bat
-```
+### Lokální Spuštění (Production)
 
-Tímto se:
-- Smaže stará databáze
-- Vytvoří čerstvé demo data
-- Spustí aplikaci na http://localhost:8501
-
-**Ideální pro první vyzkoušení!**
-
-### Běžné Spuštění (Production)
-Dvakrát kliknout na:
-```
+**Windows:**
+```bash
 run_resto_cz.bat
+```
+
+**Linux/macOS:**
+```bash
+streamlit run app_cz.py
 ```
 
 Aplikace se otevře na: http://localhost:8501
 
+### Testovací Spuštění (Fresh Database)
+```bash
+run_resto_test.bat  # Windows
+```
+
 ### Vypnutí Aplikace
-
-Dvakrát kliknout na:
+```bash
+kill_resto.bat  # Windows
 ```
-kill_resto.bat
-```
-
 Nebo v terminálu: `Ctrl+C`
 
 ---
 
 ## Funkce
 
+### 🔐 Login Page
+- Moderní design s logem Bouda Burgers
+- Bílé pozadí, čistý layout
+- Zabezpečené přihlášení
+- Demo heslo: `resto2025` (změnit v produkci!)
+
 ### 📊 Přehled
 - Měsíční shrnutí všech oddělení
-- Metriky bonusů
-- Přehled lokalit s expandery
-- Tlačítko pro přepočet bonusů
+- Metriky bonusů (průměr napříč lokalitami)
+- Expandery s detaily KPI
+- Barevné karty (zelená/oranžová/červená)
+- Tlačítko "Přepočítat bonusy"
 
-### 📈 Detailní Přehled
+### 📈 Detail
 - Filtrování dle oddělení
 - Filtrování dle KPI
 - Porovnávání lokalit
 - Grafické vizualizace
 
-### 👥 Porovnání Oddělení
+### 👥 Porovnání
 - Tabulka všech oddělení
 - Průměrné bonusy
 - Počet lokalit
 - Graf porovnání
 
-### 📝 Zadání Dat
+### 📝 Zadání
 **Tab: Ruční vstup**
 - Vybrat měsíc (YYYY-MM)
 - Vybrat lokalitu
-- Vyplnit 10 KPI hodnot
-- Uložit
+- Vyplnit KPI hodnoty
+- Uložit data
 
 **Tab: Import CSV**
 - Stáhnout šablonu
 - Vyplnit v Excelu
 - Nahrát CSV zpět
 
-### ⚙️ Nastavení (ADMIN)
+### ⚙️ Admin
+**Tab: Oddělení**
 - Přehled oddělení
 - Přehled lokalit
-- Přehled KPI prahů
-- ❌ Přidávání lokalit/oddělení zakázáno
 
-### 📤 Import/Export
-- Export dat za měsíc
-- Hromadný import CSV
+**Tab: Provozní**
+- Přehled provozních manažerů
+- **Přiřazení KPI** - checkboxy pro výběr KPI na manažera
+- Správa provozních
+
+**Tab: KPI Nastavení**
+- Přehled KPI definic
+- **Hranice KPI** - přidání/editace/mazání hraničních hodnot
+- Bonusová procenta podle splnění
+
+### 🚧 Marketing KPI
+- Placeholder pro budoucí rozšíření
+- Sekce v přípravě
+
+---
+
+## Autentizace
+
+### Lokální Nastavení
+
+Vytvořte soubor: `.streamlit/secrets.toml`
+
+```toml
+[passwords]
+admin = "VaseSilneHeslo123!"
+```
+
+### Streamlit Cloud Nastavení
+
+1. Jděte na: https://share.streamlit.io
+2. Najděte svou aplikaci → **⋮** (3 tečky)
+3. **Settings** → **Secrets**
+4. Přidejte:
+
+```toml
+[passwords]
+admin = "VaseSilneHeslo123!"
+```
+
+5. **Save** → Aplikace se automaticky restartuje
+
+### Doporučení pro Heslo
+✅ Minimálně 12 znaků
+✅ Kombinace velkých/malých písmen
+✅ Číslice
+✅ Speciální znaky (!@#$%^&*)
+
+**Příklady dobrých hesel:**
+- `Resto@2025!Secure`
+- `BoudaBurgers#KPI`
+- `MySecure!Pass123`
+
+❌ **Špatné heslo:** `123456`, `resto`, `password`
 
 ---
 
@@ -145,7 +236,8 @@ Nebo v terminálu: `Ctrl+C`
 ODDĚLENÍ
 └── LOKALITY
     └── PROVOZNÍ MANAŽEŘI
-        └── KPI (10 metrů)
+        └── KPI (10 metrik)
+            └── HRANICE (min/max/bonus)
 ```
 
 ### 10 KPI Metriky
@@ -165,53 +257,16 @@ ODDĚLENÍ
 
 ---
 
-## Užívání
-
-### Jak zadat data za měsíc
-
-1. Otevřít aplikaci: `run_resto_cz.bat`
-2. Jít na: **📝 Zadání dat**
-3. Tab: **📝 Ruční vstup** nebo **📥 Importovat CSV**
-4. Vybrat měsíc (např. 2025-11)
-5. Vybrat lokalitu (Mercury, OC4Dvory, Bouda, Bistro)
-6. Vyplnit 10 KPI hodnot
-7. Kliknout: **💾 Uložit data**
-
-### Jak importovat hromadná data
-
-1. Jít na: **📝 Zadání dat** → **📥 Importovat CSV**
-2. Kliknout: **📥 Stáhnout šablonu CSV**
-3. Vyplnit v Excelu:
-   - Měsíc: 2025-11
-   - Lokalita: Mercury, OC4Dvory, atd.
-   - KPI: Audit, Hodnocení rozvozy, atd.
-   - Hodnota: 85.5, 4.6, atd.
-4. Uložit jako CSV (UTF-8)
-5. Nahrát do aplikace: **📥 Importovat CSV**
-
-### Jak vidět bonusy
-
-1. Jít na: **📊 Přehled**
-2. Vybrat měsíc v postranním panelu
-3. Vidět bonusy za oddělení
-4. Rozbalit lokality pro detail
-
-### Jak porovnat lokality
-
-1. Jít na: **📈 Detailní přehled**
-2. Vybrat měsíc
-3. Filtrovat dle oddělení (volitelně)
-4. Filtrovat dle KPI (volitelně)
-5. Vidět tabulku a graf porovnání
-
----
-
 ## 📂 Soubory & Struktura
 
 ```
 RESTO/
 ├── app_cz.py                    # Hlavní aplikace
 ├── database.py                  # Databázový modul
+├── assets/
+│   └── logo.png                 # Logo Bouda Burgers
+├── .streamlit/
+│   └── secrets.toml             # Hesla (NECOMMITOVAT!)
 ├── resto_data.db               # SQLite databáze
 ├── requirements.txt             # Python balíky
 ├── run_resto_cz.bat            # Spuštění (production)
@@ -219,8 +274,7 @@ RESTO/
 ├── install_dependencies.bat    # Instalace balíků
 ├── kill_resto.bat              # Vypnutí aplikace
 ├── README.md                   # Tato dokumentace
-├── README_CZ.md                # Podrobná dokumentace (CZ)
-└── TODO.md                     # Technická dokumentace
+└── .gitignore                  # Git ignore pravidla
 ```
 
 ---
@@ -229,14 +283,22 @@ RESTO/
 
 ### Databáze
 - **Typ**: SQLite3 (resto_data.db)
-- **Tabulky**: 8 tabulek (departmenty, lokality, KPI data, evaluace, atd.)
+- **Tabulky**: 10 tabulek včetně:
+  - departments
+  - locations
+  - operational_managers
+  - kpi_definitions
+  - kpi_thresholds (NOVÉ)
+  - manager_kpi_assignments (NOVÉ)
+  - monthly_kpi_data
+  - monthly_kpi_evaluation
+  - department_summary
 - **Backup**: Zkopírovat `resto_data.db`
 
 ### Python Balíky
 - `streamlit` - Web framework
 - `pandas` - Data processing
 - `plotly` - Grafy
-- `openpyxl` - Excel soubory (pro import šablon)
 
 ### Port
 - **Default**: 8501
@@ -252,57 +314,44 @@ RESTO/
 pip install -r requirements.txt
 ```
 
-Nebo spustit `install_dependencies.bat`
-
 ### Chyba: "Address already in use :8501"
 **Řešení:**
 1. Spustit `kill_resto.bat`
 2. Čekat 5 sekund
 3. Spustit aplikaci znovu
 
-Nebo v Command Prompt:
-```bash
-netstat -ano | find ":8501"
-taskkill /F /PID <PID>
-```
-
-### Databáze se neinicializuje
+### Nelze se přihlásit
 **Řešení:**
-1. Smazat `resto_data.db`
-2. Spustit `run_resto_test.bat`
-3. Aplikace si vytvoří novou databázi
+1. Zkontrolovat `.streamlit/secrets.toml`
+2. Ověřit správné heslo
+3. Restartovat aplikaci
 
-### CSV import selže
+### FOREIGN KEY constraint failed
 **Řešení:**
-- Ověřit formát CSV (UTF-8)
-- Zkontrolovat názvy lokalit:
-  - Mercury
-  - OC4Dvory
-  - Bouda
-  - Bistro
-- Měsíc musí být YYYY-MM (např. 2025-11)
+1. Spustit "🔧 Opravit binární ID" v Admin
+2. Restartovat aplikaci
+3. Problém by měl být vyřešen
 
-### Dark theme se nezobrazuje
+### Dark/Light mode nefunguje
 **Řešení:**
-1. Jít do Settings (⚙️ v Streamlitu)
-2. Theme: Dark
-3. Refresh (F5)
+1. Kliknout na tlačítko ☀️ nebo 🌙 v sidebaru
+2. Počkat na reload
+3. Refresh prohlížeč (F5)
 
 ---
 
-## 📞 Support & Dokumentace
-
-### Podrobná Dokumentace
-- **README_CZ.md** - Detailní návod (čeština)
-- **TODO.md** - Technická dokumentace
+## 📞 Support
 
 ### Často Kladené Otázky
 
 **Q: Mohu přidat novou lokalitu?**
-A: Ne, v UI. Lokality se spravují v `database.py` (admin).
+A: Ano, v budoucí verzi bude v Admin UI. Zatím v `database.py`.
 
 **Q: Mohu měnit KPI prahy?**
-A: V budoucnu. Zatím v `database.py`.
+A: Ano! V Admin → KPI Nastavení → KPI Hranice.
+
+**Q: Jak změnit heslo?**
+A: Editovat `.streamlit/secrets.toml` nebo nastavit v Streamlit Cloud Secrets.
 
 **Q: Jak zálohovat data?**
 A: Zkopírovat soubor `resto_data.db`.
@@ -314,26 +363,40 @@ A: Ano, na Streamlit Cloud nebo vlastním serveru.
 
 ## 📝 Verze
 
-**Aktuální**: 2.0
-**Poslední aktualizace**: 2025-11-10
+**Aktuální**: 3.1
+**Poslední aktualizace**: 2025-11-13
 **Status**: ✅ Production Ready
+
+### Změny v 3.1
+- ✅ Autentizace s heslem
+- ✅ Light/Dark Mode přepínač
+- ✅ Moderní UI design (karty, animace, shadows)
+- ✅ Logo Bouda Burgers
+- ✅ Kompaktní sidebar (vejde se na screen)
+- ✅ Přiřazení KPI k manažerům
+- ✅ Dynamické KPI hranice
+- ✅ Porovnání měsíců
+- ✅ Binary ID fixes
+- ✅ Marketing KPI placeholder
+
+### Změny v 3.0
+- ✅ Kompletní redesign UI
+- ✅ Dark theme jako default
+- ✅ Oddělení & Lokality & Provozní
+- ✅ Detailní přehled
+- ✅ Import/Export CSV
 
 ### Změny v 2.0
 - ✅ Nezávislost na Excelu
 - ✅ Měsíční KPI (ne denní)
-- ✅ Dark theme
-- ✅ Oddělení & Lokality & Provozní
-- ✅ Detailní přehled
-- ✅ Import/Export CSV
+- ✅ SQLite databáze
 
 ---
 
 ## 📄 Licence
 
-Interní projekt. Všechna práva vyhrazena.
+Interní projekt Bouda Burgers. Všechna práva vyhrazena.
 
 ---
 
-**Vytvořeno**: Claude Code
-**Poslední úprava**: 2025-11-10
-**Kontakt**: Admin RESTO
+**Poslední úprava**: 2025-11-13
