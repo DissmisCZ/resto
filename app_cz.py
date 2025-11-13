@@ -988,7 +988,7 @@ if page == "📊 Přehled":
 # ============================================================================
 # PAGE 2: DETAILNÍ PŘEHLED - Detailed view with filters
 # ============================================================================
-elif page == "📈 Detailní přehled":
+elif page == "📈 Detail":
     st.title("📈 Detailní Přehled KPI")
 
     st.markdown(f"### Měsíc: **{format_month(selected_month)}**")
@@ -1211,7 +1211,7 @@ elif page == "👥 Porovnání":
 # ============================================================================
 # PAGE 4: ZADÁNÍ DAT - IMPROVED DATA ENTRY
 # ============================================================================
-elif page == "📝 Zadání dat":
+elif page == "📝 Zadání":
     st.title("📝 Zadání Měsíčních KPI Dat")
 
     # Display persistent save message
