@@ -1271,7 +1271,7 @@ elif page == "📝 Zadání":
             # Show if location exists in DB
             conn = db.get_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT id, nazev, aktivni FROM locations WHERE id = ?", (int(location_id),))
+            cursor.execute("SELECT id, nazev, aktivni FROM locations WHERE id = %s", (int(location_id),))
             loc_check = cursor.fetchone()
             if loc_check:
                 st.success(f"✅ Lokalita nalezena v DB: {loc_check['nazev']} (aktivni={loc_check['aktivni']})")
@@ -1456,7 +1456,7 @@ elif page == "📝 Zadání":
                             cursor.execute("""
                                 UPDATE monthly_department_kpi_data
                                 SET status = 'DELETED'
-                                WHERE mesic = ? AND department_id = ?
+                                WHERE mesic = %s AND department_id = %s
                             """, (selected_dept_month, department_id))
                             conn.commit()
                             conn.close()
@@ -1947,7 +1947,7 @@ elif page == "⚙️ Admin":
                 # Verify KPI exists
                 conn = db.get_connection()
                 cursor = conn.cursor()
-                cursor.execute("SELECT id, nazev, aktivni FROM kpi_definitions WHERE id = ?", (selected_kpi_id,))
+                cursor.execute("SELECT id, nazev, aktivni FROM kpi_definitions WHERE id = %s", (selected_kpi_id,))
                 kpi_check = cursor.fetchone()
                 if kpi_check:
                     st.success(f"✅ KPI nalezeno v DB: {kpi_check['nazev']} (aktivni={kpi_check['aktivni']})")
@@ -1955,7 +1955,7 @@ elif page == "⚙️ Admin":
                     st.error(f"❌ KPI ID {selected_kpi_id} NEEXISTUJE!")
 
                 # Check existing thresholds
-                cursor.execute("SELECT id, kpi_id, operator, min_hodnota, bonus_procento FROM kpi_thresholds WHERE kpi_id = ?", (selected_kpi_id,))
+                cursor.execute("SELECT id, kpi_id, operator, min_hodnota, bonus_procento FROM kpi_thresholds WHERE kpi_id = %s", (selected_kpi_id,))
                 raw_thresholds = cursor.fetchall()
                 if raw_thresholds:
                     st.write(f"Hranice v DB: {len(raw_thresholds)}")
@@ -2183,11 +2183,11 @@ elif page == "⚙️ Admin":
                 record_id, mesic, loc_id, kpi_id, hodnota, status = row
 
                 # Check if location exists and is active
-                cursor.execute("SELECT id, nazev, aktivni FROM locations WHERE id = ?", (loc_id,))
+                cursor.execute("SELECT id, nazev, aktivni FROM locations WHERE id = %s", (loc_id,))
                 loc_result = cursor.fetchone()
 
                 # Check if KPI exists and is active
-                cursor.execute("SELECT id, nazev, aktivni FROM kpi_definitions WHERE id = ?", (kpi_id,))
+                cursor.execute("SELECT id, nazev, aktivni FROM kpi_definitions WHERE id = %s", (kpi_id,))
                 kpi_result = cursor.fetchone()
 
                 st.text(f"Záznam #{record_id} ({mesic}):")
