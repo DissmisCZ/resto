@@ -1151,14 +1151,18 @@ elif page == "⚙️ Admin":
         st.markdown("#### 🎯 Nastavit KPI pro provozního")
 
         if len(mgrs) > 0:
-            col1, col2 = st.columns([1, 2])
+            st.markdown("**Vyberte provozního:**")
+            selected_mgr = st.radio(
+                "Provozní:",
+                mgrs['jmeno'].tolist(),
+                key="mgr_kpi_select",
+                horizontal=False,
+                label_visibility="collapsed"
+            )
+            selected_mgr_id = safe_int_id(mgrs[mgrs['jmeno'] == selected_mgr]['id'].values[0])
 
-            with col1:
-                selected_mgr = st.selectbox("Vyberte provozního:", mgrs['jmeno'].tolist(), key="mgr_kpi_select")
-                selected_mgr_id = safe_int_id(mgrs[mgrs['jmeno'] == selected_mgr]['id'].values[0])
-
-            with col2:
-                st.caption(f"Nastavení KPI pro: **{selected_mgr}**")
+            st.markdown(f"**Nastavení KPI pro: {selected_mgr}**")
+            st.markdown("---")
 
             # Get all KPIs
             all_kpis = db.get_all_kpi_definitions()
