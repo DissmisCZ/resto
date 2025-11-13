@@ -195,17 +195,17 @@ hr {
 
 /* Compact sidebar - better readability */
 [data-testid="stSidebar"] .element-container {
-    margin-bottom: 0.4rem !important;
+    margin-bottom: 0.3rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio > div {
-    gap: 0.35rem !important;
+    gap: 0.15rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio label {
-    padding: 0.4rem 0 !important;
+    padding: 0.2rem 0 !important;
     font-size: 15px !important;
-    line-height: 1.5 !important;
+    line-height: 1.4 !important;
     display: flex !important;
     align-items: center !important;
 }
@@ -492,17 +492,17 @@ hr {
 
 /* Compact sidebar - better readability */
 [data-testid="stSidebar"] .element-container {
-    margin-bottom: 0.4rem !important;
+    margin-bottom: 0.3rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio > div {
-    gap: 0.35rem !important;
+    gap: 0.15rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio label {
-    padding: 0.4rem 0 !important;
+    padding: 0.2rem 0 !important;
     font-size: 15px !important;
-    line-height: 1.5 !important;
+    line-height: 1.4 !important;
     display: flex !important;
     align-items: center !important;
 }
