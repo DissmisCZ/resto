@@ -125,6 +125,15 @@ st.markdown("""
     border-radius: 8px;
     padding: 10px;
 }
+/* Zakázat psaní do selectbox - jen dropdown */
+[data-baseweb="select"] input {
+    pointer-events: none;
+    cursor: pointer;
+    caret-color: transparent;
+}
+[data-baseweb="select"] {
+    cursor: pointer;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1151,18 +1160,12 @@ elif page == "⚙️ Admin":
         st.markdown("#### 🎯 Nastavit KPI pro provozního")
 
         if len(mgrs) > 0:
-            st.markdown("**Vyberte provozního:**")
-            selected_mgr = st.radio(
-                "Provozní:",
+            selected_mgr = st.selectbox(
+                "Vyberte provozního:",
                 mgrs['jmeno'].tolist(),
-                key="mgr_kpi_select",
-                horizontal=False,
-                label_visibility="collapsed"
+                key="mgr_kpi_select"
             )
             selected_mgr_id = safe_int_id(mgrs[mgrs['jmeno'] == selected_mgr]['id'].values[0])
-
-            st.markdown(f"**Nastavení KPI pro: {selected_mgr}**")
-            st.markdown("---")
 
             # Get all KPIs
             all_kpis = db.get_all_kpi_definitions()
