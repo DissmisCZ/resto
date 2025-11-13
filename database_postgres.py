@@ -22,7 +22,7 @@ def get_connection():
     try:
         # Get connection string from Streamlit secrets
         conn_string = st.secrets["database"]["url"]
-        conn = psycopg2.connect(conn_string)
+        conn = psycopg2.connect(conn_string, cursor_factory=psycopg2.extras.RealDictCursor)
         # Use RealDictCursor for dict-like row access (similar to sqlite3.Row)
         return conn
     except Exception as e:
