@@ -193,55 +193,69 @@ hr {
     margin: 1.5rem 0 !important;
 }
 
-/* Compact sidebar - balanced size */
+/* Compact sidebar - better readability */
 [data-testid="stSidebar"] .element-container {
-    margin-bottom: 0.3rem !important;
+    margin-bottom: 0.4rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio > div {
-    gap: 0.2rem !important;
+    gap: 0.35rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio label {
-    padding: 0.25rem 0 !important;
-    font-size: 13px !important;
-    line-height: 1.3 !important;
+    padding: 0.4rem 0 !important;
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+[data-testid="stSidebar"] .stRadio label > div {
+    display: flex !important;
+    align-items: center !important;
+}
+
+[data-testid="stSidebar"] .stRadio input[type="radio"] {
+    margin-right: 0.5rem !important;
+    width: 18px !important;
+    height: 18px !important;
+    vertical-align: middle !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox label {
-    font-size: 12px !important;
-    margin-bottom: 0.2rem !important;
+    font-size: 14px !important;
+    margin-bottom: 0.3rem !important;
     font-weight: 600 !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox > div {
-    font-size: 13px !important;
+    font-size: 14px !important;
 }
 
 [data-testid="stSidebar"] hr {
-    margin: 0.4rem 0 !important;
+    margin: 0.6rem 0 !important;
     opacity: 0.3;
 }
 
 [data-testid="stSidebar"] h3 {
-    font-size: 15px !important;
+    font-size: 16px !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+}
+
+[data-testid="stSidebar"] p {
+    font-size: 12px !important;
     margin: 0 !important;
     line-height: 1.3 !important;
 }
 
-[data-testid="stSidebar"] p {
-    font-size: 11px !important;
-    margin: 0 !important;
-    line-height: 1.2 !important;
-}
-
 [data-testid="stSidebar"] .stButton > button {
-    padding: 8px 12px !important;
-    font-size: 12px !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
 }
 
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
-    font-size: 11px !important;
+    font-size: 12px !important;
 }
 
 [data-testid="stHeader"] {
@@ -476,55 +490,69 @@ hr {
     margin: 1.5rem 0 !important;
 }
 
-/* Compact sidebar - balanced size */
+/* Compact sidebar - better readability */
 [data-testid="stSidebar"] .element-container {
-    margin-bottom: 0.3rem !important;
+    margin-bottom: 0.4rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio > div {
-    gap: 0.2rem !important;
+    gap: 0.35rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio label {
-    padding: 0.25rem 0 !important;
-    font-size: 13px !important;
-    line-height: 1.3 !important;
+    padding: 0.4rem 0 !important;
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+[data-testid="stSidebar"] .stRadio label > div {
+    display: flex !important;
+    align-items: center !important;
+}
+
+[data-testid="stSidebar"] .stRadio input[type="radio"] {
+    margin-right: 0.5rem !important;
+    width: 18px !important;
+    height: 18px !important;
+    vertical-align: middle !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox label {
-    font-size: 12px !important;
-    margin-bottom: 0.2rem !important;
+    font-size: 14px !important;
+    margin-bottom: 0.3rem !important;
     font-weight: 600 !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox > div {
-    font-size: 13px !important;
+    font-size: 14px !important;
 }
 
 [data-testid="stSidebar"] hr {
-    margin: 0.4rem 0 !important;
+    margin: 0.6rem 0 !important;
     opacity: 0.3;
 }
 
 [data-testid="stSidebar"] h3 {
-    font-size: 15px !important;
+    font-size: 16px !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+}
+
+[data-testid="stSidebar"] p {
+    font-size: 12px !important;
     margin: 0 !important;
     line-height: 1.3 !important;
 }
 
-[data-testid="stSidebar"] p {
-    font-size: 11px !important;
-    margin: 0 !important;
-    line-height: 1.2 !important;
-}
-
 [data-testid="stSidebar"] .stButton > button {
-    padding: 8px 12px !important;
-    font-size: 12px !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
 }
 
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
-    font-size: 11px !important;
+    font-size: 12px !important;
 }
 
 [data-testid="stHeader"] {
