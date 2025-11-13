@@ -167,90 +167,6 @@ html, body, [data-testid="stAppViewContainer"] {{
 [data-baseweb="select"] {{
     cursor: pointer;
 }}
-
-/* Theme Toggle Switch */
-.theme-toggle {{
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    z-index: 999;
-}}
-
-.theme-switch {{
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
-}}
-
-.theme-switch input {{
-    opacity: 0;
-    width: 0;
-    height: 0;
-}}
-
-.slider {{
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 34px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}}
-
-.slider:before {{
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}}
-
-.slider:after {{
-    content: '🌙';
-    position: absolute;
-    left: 8px;
-    top: 7px;
-    font-size: 18px;
-    transition: all 0.4s;
-    opacity: 1;
-}}
-
-input:checked + .slider {{
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}}
-
-input:checked + .slider:before {{
-    transform: translateX(26px);
-}}
-
-input:checked + .slider:after {{
-    content: '☀️';
-    left: 34px;
-    opacity: 1;
-}}
-
-.slider:hover {{
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transform: translateY(-2px);
-}}
-
-.theme-label {{
-    color: var(--text-primary);
-    font-size: 12px;
-    text-align: center;
-    margin-top: 5px;
-    font-weight: 500;
-}}
 </style>
 <div class="{theme_class}"></div>
 """, unsafe_allow_html=True)
@@ -388,32 +304,17 @@ with st.sidebar:
         st.session_state.authenticated = False
         st.rerun()
 
-    # Theme toggle at bottom
+    # Theme switch buttons at bottom
     st.markdown("---")
-    theme_label = "🌙 Dark Mode" if st.session_state.dark_mode else "☀️ Light Mode"
-
-    # HTML toggle switch
-    toggle_html = f"""
-    <div class="theme-toggle">
-        <label class="theme-switch">
-            <input type="checkbox" {'checked' if not st.session_state.dark_mode else ''}
-                   onclick="window.parent.postMessage({{type: 'streamlit:setComponentValue', value: !{str(st.session_state.dark_mode).lower()}}}, '*')">
-            <span class="slider"></span>
-        </label>
-        <div class="theme-label">{theme_label}</div>
-    </div>
-    """
-
-    # Streamlit checkbox (hidden, but functional)
-    new_mode = st.checkbox(
-        theme_label,
-        value=not st.session_state.dark_mode,
-        key="theme_toggle_checkbox"
-    )
-
-    if new_mode != (not st.session_state.dark_mode):
-        st.session_state.dark_mode = not new_mode
-        st.rerun()
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("☀️ Light", use_container_width=True, type="primary" if not st.session_state.get('dark_mode', True) else "secondary"):
+            st.session_state.dark_mode = False
+            st.rerun()
+    with col2:
+        if st.button("🌙 Dark", use_container_width=True, type="primary" if st.session_state.get('dark_mode', True) else "secondary"):
+            st.session_state.dark_mode = True
+            st.rerun()
 
 
 # ============================================================================
