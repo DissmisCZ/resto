@@ -46,9 +46,15 @@ if not st.session_state.authenticated:
         text-align: center !important;
     }
     .stImage {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 auto 20px auto !important;
+    }
+    .stImage > img {
+        margin: 0 auto !important;
+        display: block !important;
     }
     .stTextInput > div > div > input {
         border-radius: 10px;
@@ -71,11 +77,13 @@ if not st.session_state.authenticated:
     </style>
     """, unsafe_allow_html=True)
 
-    # Logo - centered
-    try:
-        st.image("assets/logo.png", width=180)
-    except:
-        st.markdown('<div style="text-align: center; font-size: 80px; margin-bottom: 20px;">🍔</div>', unsafe_allow_html=True)
+    # Logo - perfectly centered using columns
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        try:
+            st.image("assets/logo.png", width=180)
+        except:
+            st.markdown('<div style="text-align: center; font-size: 80px; margin-bottom: 20px;">🍔</div>', unsafe_allow_html=True)
 
     # Title - centered
     st.markdown('<h2 style="text-align: center; color: white; margin-bottom: 5px; font-size: 28px;">Bouda Burgers</h2>', unsafe_allow_html=True)
@@ -126,55 +134,55 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
     border-right: 1px solid #30363d;
 }
 
-/* Compact sidebar - very small */
+/* Compact sidebar - balanced size */
 [data-testid="stSidebar"] .element-container {
-    margin-bottom: 0.2rem !important;
+    margin-bottom: 0.3rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio > div {
-    gap: 0.1rem !important;
+    gap: 0.2rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio label {
-    padding: 0.2rem 0 !important;
-    font-size: 12px !important;
-    line-height: 1.2 !important;
+    padding: 0.25rem 0 !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox label {
-    font-size: 11px !important;
-    margin-bottom: 0.15rem !important;
+    font-size: 12px !important;
+    margin-bottom: 0.2rem !important;
     font-weight: 600 !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox > div {
-    font-size: 12px !important;
+    font-size: 13px !important;
 }
 
 [data-testid="stSidebar"] hr {
-    margin: 0.3rem 0 !important;
+    margin: 0.4rem 0 !important;
     opacity: 0.3;
 }
 
 [data-testid="stSidebar"] h3 {
-    font-size: 14px !important;
+    font-size: 15px !important;
+    margin: 0 !important;
+    line-height: 1.3 !important;
+}
+
+[data-testid="stSidebar"] p {
+    font-size: 11px !important;
     margin: 0 !important;
     line-height: 1.2 !important;
 }
 
-[data-testid="stSidebar"] p {
-    font-size: 10px !important;
-    margin: 0 !important;
-    line-height: 1.1 !important;
-}
-
 [data-testid="stSidebar"] .stButton > button {
-    padding: 6px 10px !important;
-    font-size: 11px !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
 }
 
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
-    font-size: 10px !important;
+    font-size: 11px !important;
 }
 
 [data-testid="stHeader"] {
@@ -341,55 +349,55 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
     border-right: 1px solid #dee2e6;
 }
 
-/* Compact sidebar - very small */
+/* Compact sidebar - balanced size */
 [data-testid="stSidebar"] .element-container {
-    margin-bottom: 0.2rem !important;
+    margin-bottom: 0.3rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio > div {
-    gap: 0.1rem !important;
+    gap: 0.2rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio label {
-    padding: 0.2rem 0 !important;
-    font-size: 12px !important;
-    line-height: 1.2 !important;
+    padding: 0.25rem 0 !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox label {
-    font-size: 11px !important;
-    margin-bottom: 0.15rem !important;
+    font-size: 12px !important;
+    margin-bottom: 0.2rem !important;
     font-weight: 600 !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox > div {
-    font-size: 12px !important;
+    font-size: 13px !important;
 }
 
 [data-testid="stSidebar"] hr {
-    margin: 0.3rem 0 !important;
+    margin: 0.4rem 0 !important;
     opacity: 0.3;
 }
 
 [data-testid="stSidebar"] h3 {
-    font-size: 14px !important;
+    font-size: 15px !important;
+    margin: 0 !important;
+    line-height: 1.3 !important;
+}
+
+[data-testid="stSidebar"] p {
+    font-size: 11px !important;
     margin: 0 !important;
     line-height: 1.2 !important;
 }
 
-[data-testid="stSidebar"] p {
-    font-size: 10px !important;
-    margin: 0 !important;
-    line-height: 1.1 !important;
-}
-
 [data-testid="stSidebar"] .stButton > button {
-    padding: 6px 10px !important;
-    font-size: 11px !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
 }
 
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
-    font-size: 10px !important;
+    font-size: 11px !important;
 }
 
 [data-testid="stHeader"] {
