@@ -1253,9 +1253,39 @@ elif page == "⚙️ Admin":
         else:
             selected_kpi_name = st.selectbox("🎯 Vyberte KPI:", kpis['nazev'].tolist(), key="threshold_kpi_select")
             selected_kpi_id = kpis[kpis['nazev'] == selected_kpi_name]['id'].values[0]
+
+            # Ensure KPI ID is integer, not bytes
+            if isinstance(selected_kpi_id, bytes):
+                selected_kpi_id = int.from_bytes(selected_kpi_id, byteorder='little')
+            selected_kpi_id = int(selected_kpi_id)
+
             selected_kpi_jednotka = kpis[kpis['id'] == selected_kpi_id]['jednotka'].values[0]
 
             st.markdown(f"#### 📋 Hranice pro: **{selected_kpi_name}** ({selected_kpi_jednotka})")
+
+            # Debug info
+            with st.expander("🔍 Debug Info"):
+                st.code(f"KPI: {selected_kpi_name}\nKPI ID: {selected_kpi_id} (typ: {type(selected_kpi_id).__name__})")
+                # Verify KPI exists
+                conn = db.get_connection()
+                cursor = conn.cursor()
+                cursor.execute("SELECT id, nazev, aktivni FROM kpi_definitions WHERE id = ?", (selected_kpi_id,))
+                kpi_check = cursor.fetchone()
+                if kpi_check:
+                    st.success(f"✅ KPI nalezeno v DB: {kpi_check['nazev']} (aktivni={kpi_check['aktivni']})")
+                else:
+                    st.error(f"❌ KPI ID {selected_kpi_id} NEEXISTUJE!")
+
+                # Check existing thresholds
+                cursor.execute("SELECT id, kpi_id, operator, min_hodnota, bonus_procento FROM kpi_thresholds WHERE kpi_id = ?", (selected_kpi_id,))
+                raw_thresholds = cursor.fetchall()
+                if raw_thresholds:
+                    st.write(f"Hranice v DB: {len(raw_thresholds)}")
+                    for t in raw_thresholds[:3]:
+                        st.text(f"  ID {t['id']}: kpi_id={t['kpi_id']} (typ={type(t['kpi_id']).__name__}), {t['operator']} {t['min_hodnota']} → {t['bonus_procento']}%")
+                else:
+                    st.warning("Žádné hranice v DB")
+                conn.close()
 
             # Display existing thresholds
             thresholds = db.get_kpi_thresholds(selected_kpi_id)

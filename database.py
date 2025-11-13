@@ -1099,6 +1099,17 @@ def add_kpi_threshold(kpi_id, operator, bonus_procento, min_hodnota=None, max_ho
     conn = get_connection()
     cursor = conn.cursor()
     try:
+        # Ensure kpi_id is integer, not bytes
+        if isinstance(kpi_id, bytes):
+            kpi_id = int.from_bytes(kpi_id, byteorder='little')
+        kpi_id = int(kpi_id)
+
+        # Verify KPI exists
+        cursor.execute("SELECT id FROM kpi_definitions WHERE id = ? AND aktivni = 1", (kpi_id,))
+        if not cursor.fetchone():
+            conn.close()
+            return False, f"KPI ID {kpi_id} neexistuje nebo není aktivní", None
+
         if poradi is None:
             cursor.execute("SELECT MAX(poradi) FROM kpi_thresholds WHERE kpi_id = ?", (kpi_id,))
             max_poradi = cursor.fetchone()[0]
@@ -1114,7 +1125,7 @@ def add_kpi_threshold(kpi_id, operator, bonus_procento, min_hodnota=None, max_ho
         return True, "Hranice přidána", new_id
     except Exception as e:
         conn.close()
-        return False, str(e), None
+        return False, f"Chyba: {str(e)}", None
 
 def update_kpi_threshold(threshold_id, min_hodnota, max_hodnota, operator, bonus_procento, popis, poradi):
     """Update KPI threshold - updates all fields"""
@@ -1290,7 +1301,7 @@ def get_departments_with_vlastni_kpi():
 # ============ CLEANUP FUNCTIONS ============
 
 def fix_binary_ids():
-    """Fix binary location_id and kpi_id in monthly_kpi_data table"""
+    """Fix binary location_id and kpi_id in all tables"""
     conn = sqlite3.connect(DATABASE_FILE, check_same_thread=False)
     # Don't use Row factory for this operation
     cursor = conn.cursor()
@@ -1298,7 +1309,7 @@ def fix_binary_ids():
     try:
         fixed_count = 0
 
-        # Get all records with their raw data
+        # Fix monthly_kpi_data
         cursor.execute("SELECT id, location_id, kpi_id FROM monthly_kpi_data")
         records = cursor.fetchall()
 
@@ -1306,9 +1317,7 @@ def fix_binary_ids():
             record_id, location_id, kpi_id = record
             fixed = False
 
-            # Convert binary location_id to integer if needed
             if isinstance(location_id, bytes):
-                # Try to convert bytes to integer (little-endian)
                 try:
                     location_id_int = int.from_bytes(location_id, byteorder='little')
                     cursor.execute("UPDATE monthly_kpi_data SET location_id = ? WHERE id = ?",
@@ -1317,7 +1326,6 @@ def fix_binary_ids():
                 except:
                     pass
 
-            # Convert binary kpi_id to integer if needed
             if isinstance(kpi_id, bytes):
                 try:
                     kpi_id_int = int.from_bytes(kpi_id, byteorder='little')
@@ -1330,7 +1338,7 @@ def fix_binary_ids():
             if fixed:
                 fixed_count += 1
 
-        # Do the same for monthly_department_kpi_data if it exists
+        # Fix monthly_department_kpi_data
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='monthly_department_kpi_data'")
         if cursor.fetchone():
             cursor.execute("SELECT id, department_id, kpi_id FROM monthly_department_kpi_data")
@@ -1360,6 +1368,22 @@ def fix_binary_ids():
 
                 if fixed:
                     fixed_count += 1
+
+        # FIX KPI_THRESHOLDS - This is the new part!
+        cursor.execute("SELECT id, kpi_id FROM kpi_thresholds")
+        threshold_records = cursor.fetchall()
+
+        for record in threshold_records:
+            record_id, kpi_id = record
+
+            if isinstance(kpi_id, bytes):
+                try:
+                    kpi_id_int = int.from_bytes(kpi_id, byteorder='little')
+                    cursor.execute("UPDATE kpi_thresholds SET kpi_id = ? WHERE id = ?",
+                                 (kpi_id_int, record_id))
+                    fixed_count += 1
+                except:
+                    pass
 
         conn.commit()
         conn.close()
