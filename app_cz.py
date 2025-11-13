@@ -151,9 +151,46 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
     color: #fafafa !important;
 }
 
+/* Main content area - better padding */
+.block-container {
+    padding: 2rem 3rem !important;
+    max-width: 1400px !important;
+}
+
 [data-testid="stSidebar"] {
     background-color: #262730 !important;
     border-right: 1px solid #30363d;
+}
+
+/* Page titles */
+h1 {
+    font-size: 2.5rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 1.5rem !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+h2 {
+    font-size: 1.8rem !important;
+    font-weight: 600 !important;
+    margin: 1.5rem 0 1rem 0 !important;
+}
+
+h3 {
+    font-size: 1.4rem !important;
+    font-weight: 600 !important;
+    margin: 1rem 0 0.75rem 0 !important;
+}
+
+/* Horizontal dividers */
+hr {
+    border: none !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, #30363d, transparent) !important;
+    margin: 1.5rem 0 !important;
 }
 
 /* Compact sidebar - balanced size */
@@ -345,14 +382,42 @@ input, textarea, [data-baseweb="input"] {
     padding: 10px;
 }
 
-/* Expanders */
+/* Expanders - beautiful cards */
 [data-testid="stExpander"] {
-    background-color: #262730 !important;
+    background-color: #1a1d2e !important;
     border: 1px solid #30363d !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
+    margin: 1rem 0 !important;
+    transition: all 0.3s ease !important;
+}
+
+[data-testid="stExpander"]:hover {
+    border-color: #40464d !important;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4) !important;
+    transform: translateY(-2px) !important;
 }
 
 [data-testid="stExpander"] summary {
     color: #fafafa !important;
+    font-weight: 600 !important;
+    padding: 1rem !important;
+}
+
+[data-testid="stExpander"][aria-expanded="true"] {
+    background-color: #262730 !important;
+}
+
+/* Alert boxes */
+.stAlert {
+    border-radius: 10px !important;
+    padding: 1rem 1.25rem !important;
+    margin: 1rem 0 !important;
+    border-left: 4px solid !important;
+}
+
+[data-testid="stNotification"] {
+    border-radius: 10px !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -362,13 +427,53 @@ else:
 <style>
 /* Background and text */
 html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
-    background-color: #ffffff !important;
+    background-color: #f5f7fa !important;
     color: #1a1a1a !important;
 }
 
+/* Main content area - better padding */
+.block-container {
+    padding: 2rem 3rem !important;
+    max-width: 1400px !important;
+}
+
 [data-testid="stSidebar"] {
-    background-color: #f8f9fa !important;
-    border-right: 1px solid #dee2e6;
+    background-color: #ffffff !important;
+    border-right: 1px solid #e5e7eb;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.05) !important;
+}
+
+/* Page titles */
+h1 {
+    font-size: 2.5rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 1.5rem !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+h2 {
+    font-size: 1.8rem !important;
+    font-weight: 600 !important;
+    margin: 1.5rem 0 1rem 0 !important;
+    color: #1f2937 !important;
+}
+
+h3 {
+    font-size: 1.4rem !important;
+    font-weight: 600 !important;
+    margin: 1rem 0 0.75rem 0 !important;
+    color: #374151 !important;
+}
+
+/* Horizontal dividers */
+hr {
+    border: none !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, #d1d5db, transparent) !important;
+    margin: 1.5rem 0 !important;
 }
 
 /* Compact sidebar - balanced size */
@@ -562,14 +667,42 @@ input, textarea, [data-baseweb="input"] {
     padding: 10px;
 }
 
-/* Expanders */
+/* Expanders - beautiful cards */
 [data-testid="stExpander"] {
-    background-color: #f8f9fa !important;
-    border: 1px solid #dee2e6 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    margin: 1rem 0 !important;
+    transition: all 0.3s ease !important;
+}
+
+[data-testid="stExpander"]:hover {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+    transform: translateY(-2px) !important;
 }
 
 [data-testid="stExpander"] summary {
     color: #1a1a1a !important;
+    font-weight: 600 !important;
+    padding: 1rem !important;
+}
+
+[data-testid="stExpander"][aria-expanded="true"] {
+    background-color: #f9fafb !important;
+}
+
+/* Alert boxes */
+.stAlert {
+    border-radius: 10px !important;
+    padding: 1rem 1.25rem !important;
+    margin: 1rem 0 !important;
+    border-left: 4px solid !important;
+}
+
+[data-testid="stNotification"] {
+    border-radius: 10px !important;
 }
 </style>
 """, unsafe_allow_html=True)
