@@ -158,6 +158,12 @@ def month_to_string(dt):
     """Convert date object to YYYY-MM string"""
     return dt.strftime("%Y-%m")
 
+def safe_int_id(value):
+    """Safely convert ID to integer (handles bytes from pandas)"""
+    if isinstance(value, bytes):
+        return int.from_bytes(value, byteorder='little')
+    return int(value)
+
 # Initialize session state for persistent messages
 if 'save_message' not in st.session_state:
     st.session_state.save_message = None
@@ -632,7 +638,7 @@ elif page == "📝 Zadání dat":
             selected_location = st.selectbox("Lokalita:", locations['nazev'].tolist(), key="input_location")
 
         st.markdown("---")
-        location_id = locations[locations['nazev'] == selected_location]['id'].values[0]
+        location_id = safe_int_id(locations[locations['nazev'] == selected_location]['id'].values[0])
 
         # Debug: Show location ID
         with st.expander("🔍 Debug Info"):
@@ -759,7 +765,7 @@ elif page == "📝 Zadání dat":
                 selected_department = st.selectbox("Oddělení:", depts_with_kpi['nazev'].tolist(), key="input_department")
 
             st.markdown("---")
-            department_id = depts_with_kpi[depts_with_kpi['nazev'] == selected_department]['id'].values[0]
+            department_id = safe_int_id(depts_with_kpi[depts_with_kpi['nazev'] == selected_department]['id'].values[0])
 
             # Get existing data for this month/department OR show zeros
             existing_dept_data = db.get_monthly_department_kpi_data(selected_dept_month, department_id)
@@ -1048,7 +1054,7 @@ elif page == "⚙️ Admin":
         with col1:
             if len(depts) > 0:
                 del_dept = st.selectbox("Vyberte oddělení ke smazání:", depts['nazev'].tolist(), key="del_dept_select")
-                del_dept_id = depts[depts['nazev'] == del_dept]['id'].values[0]
+                del_dept_id = safe_int_id(depts[depts['nazev'] == del_dept]['id'].values[0])
         with col2:
             if st.button("🗑️ Smazat", key="del_dept_btn"):
                 success, msg = db.delete_department(del_dept_id)
@@ -1072,7 +1078,7 @@ elif page == "⚙️ Admin":
         with col2:
             depts = db.get_departments()
             new_loc_dept = st.selectbox("Oddělení:", depts['nazev'].tolist(), key="add_loc_dept")
-            dept_id = depts[depts['nazev'] == new_loc_dept]['id'].values[0]
+            dept_id = safe_int_id(depts[depts['nazev'] == new_loc_dept]['id'].values[0])
         with col3:
             if st.button("➕ Přidat lokalitu", key="add_loc_btn"):
                 success, msg = db.add_location(new_loc_name, dept_id)
@@ -1088,10 +1094,10 @@ elif page == "⚙️ Admin":
         with col1:
             if len(locs) > 0:
                 loc_to_move = st.selectbox("Lokalita:", locs['nazev'].tolist(), key="move_loc")
-                loc_id = locs[locs['nazev'] == loc_to_move]['id'].values[0]
+                loc_id = safe_int_id(locs[locs['nazev'] == loc_to_move]['id'].values[0])
         with col2:
             new_dept = st.selectbox("Nové oddělení:", depts['nazev'].tolist(), key="move_dept")
-            new_dept_id = depts[depts['nazev'] == new_dept]['id'].values[0]
+            new_dept_id = safe_int_id(depts[depts['nazev'] == new_dept]['id'].values[0])
         with col3:
             if st.button("🔄 Přeřadit", key="move_loc_btn"):
                 success, msg = db.update_location_department(loc_id, new_dept_id)
@@ -1107,7 +1113,7 @@ elif page == "⚙️ Admin":
         with col1:
             if len(locs) > 0:
                 del_loc = st.selectbox("Vyberte lokalitu ke smazání:", locs['nazev'].tolist(), key="del_loc_select")
-                del_loc_id = locs[locs['nazev'] == del_loc]['id'].values[0]
+                del_loc_id = safe_int_id(locs[locs['nazev'] == del_loc]['id'].values[0])
         with col2:
             if st.button("🗑️ Smazat", key="del_loc_btn"):
                 success, msg = db.delete_location(del_loc_id)
@@ -1131,7 +1137,7 @@ elif page == "⚙️ Admin":
         with col2:
             depts = db.get_departments()
             new_mgr_dept = st.selectbox("Oddělení:", depts['nazev'].tolist(), key="add_mgr_dept")
-            dept_id = depts[depts['nazev'] == new_mgr_dept]['id'].values[0]
+            dept_id = safe_int_id(depts[depts['nazev'] == new_mgr_dept]['id'].values[0])
         with col3:
             if st.button("➕ Přidat provozního", key="add_mgr_btn"):
                 success, msg = db.add_operational_manager(new_mgr_name, dept_id)
@@ -1147,7 +1153,7 @@ elif page == "⚙️ Admin":
         with col1:
             if len(mgrs) > 0:
                 del_mgr = st.selectbox("Vyberte provozního ke smazání:", mgrs['jmeno'].tolist(), key="del_mgr_select")
-                del_mgr_id = mgrs[mgrs['jmeno'] == del_mgr]['id'].values[0]
+                del_mgr_id = safe_int_id(mgrs[mgrs['jmeno'] == del_mgr]['id'].values[0])
         with col2:
             if st.button("🗑️ Smazat", key="del_mgr_btn"):
                 success, msg = db.delete_operational_manager(del_mgr_id)
@@ -1196,7 +1202,7 @@ elif page == "⚙️ Admin":
             col1, col2 = st.columns(2)
             with col1:
                 edit_kpi = st.selectbox("Vyberte KPI k úpravě:", kpis['nazev'].tolist(), key="edit_kpi_select")
-                edit_kpi_id = kpis[kpis['nazev'] == edit_kpi]['id'].values[0]
+                edit_kpi_id = safe_int_id(kpis[kpis['nazev'] == edit_kpi]['id'].values[0])
                 edit_kpi_data = kpis[kpis['id'] == edit_kpi_id].iloc[0]
 
             with col2:
@@ -1231,7 +1237,7 @@ elif page == "⚙️ Admin":
             col1, col2 = st.columns(2)
             with col1:
                 del_kpi = st.selectbox("Vyberte KPI ke smazání:", kpis['nazev'].tolist(), key="del_kpi_select")
-                del_kpi_id = kpis[kpis['nazev'] == del_kpi]['id'].values[0]
+                del_kpi_id = safe_int_id(kpis[kpis['nazev'] == del_kpi]['id'].values[0])
             with col2:
                 if st.button("🗑️ Smazat KPI", key="del_kpi_btn"):
                     success, msg = db.delete_kpi_definition(del_kpi_id)
@@ -1252,12 +1258,7 @@ elif page == "⚙️ Admin":
             st.warning("⚠️ Nejdříve musíte vytvořit KPI definice v předchozím tabu")
         else:
             selected_kpi_name = st.selectbox("🎯 Vyberte KPI:", kpis['nazev'].tolist(), key="threshold_kpi_select")
-            selected_kpi_id = kpis[kpis['nazev'] == selected_kpi_name]['id'].values[0]
-
-            # Ensure KPI ID is integer, not bytes
-            if isinstance(selected_kpi_id, bytes):
-                selected_kpi_id = int.from_bytes(selected_kpi_id, byteorder='little')
-            selected_kpi_id = int(selected_kpi_id)
+            selected_kpi_id = safe_int_id(kpis[kpis['nazev'] == selected_kpi_name]['id'].values[0])
 
             selected_kpi_jednotka = kpis[kpis['id'] == selected_kpi_id]['jednotka'].values[0]
 
