@@ -84,6 +84,7 @@ if is_dark:
     # Dark mode
     st.markdown("""
 <style>
+/* Background and text */
 html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
     background-color: #0e1117 !important;
     color: #fafafa !important;
@@ -96,6 +97,93 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
 
 [data-testid="stHeader"] {
     background-color: #0e1117 !important;
+}
+
+/* Text elements */
+h1, h2, h3, h4, h5, h6, p, span, div, label {
+    color: #fafafa !important;
+}
+
+[data-testid="stMarkdownContainer"] {
+    color: #fafafa !important;
+}
+
+/* Buttons */
+.stButton > button {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+    border: 1px solid #30363d !important;
+}
+
+.stButton > button:hover {
+    background-color: #30363d !important;
+    border-color: #40464d !important;
+}
+
+.stButton > button[kind="primary"] {
+    background-color: #0e7490 !important;
+    color: white !important;
+    border: none !important;
+}
+
+.stButton > button[kind="primary"]:hover {
+    background-color: #0891b2 !important;
+}
+
+.stButton > button[kind="secondary"] {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+}
+
+/* Input fields */
+input, textarea, [data-baseweb="input"] {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+    border-color: #30363d !important;
+}
+
+/* Selectbox */
+[data-baseweb="select"] {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+    cursor: pointer;
+}
+
+[data-baseweb="select"] input {
+    pointer-events: none;
+    cursor: pointer;
+    caret-color: transparent;
+    color: #fafafa !important;
+}
+
+[data-baseweb="select"] > div {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+}
+
+/* Radio buttons */
+[data-testid="stRadio"] label {
+    color: #fafafa !important;
+}
+
+/* Checkboxes */
+[data-testid="stCheckbox"] label {
+    color: #fafafa !important;
+}
+
+/* Metrics */
+[data-testid="stMetric"] {
+    background-color: #262730 !important;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+[data-testid="stMetric"] label {
+    color: #a0a0a0 !important;
+}
+
+[data-testid="stMetric"] [data-testid="stMetricValue"] {
+    color: #fafafa !important;
 }
 
 /* Metric cards */
@@ -145,14 +233,14 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
     padding: 10px;
 }
 
-/* Selectbox - jen dropdown */
-[data-baseweb="select"] input {
-    pointer-events: none;
-    cursor: pointer;
-    caret-color: transparent;
+/* Expanders */
+[data-testid="stExpander"] {
+    background-color: #262730 !important;
+    border: 1px solid #30363d !important;
 }
-[data-baseweb="select"] {
-    cursor: pointer;
+
+[data-testid="stExpander"] summary {
+    color: #fafafa !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -160,6 +248,7 @@ else:
     # Light mode
     st.markdown("""
 <style>
+/* Background and text */
 html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
     background-color: #ffffff !important;
     color: #1a1a1a !important;
@@ -172,6 +261,93 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
 
 [data-testid="stHeader"] {
     background-color: #ffffff !important;
+}
+
+/* Text elements */
+h1, h2, h3, h4, h5, h6, p, span, div, label {
+    color: #1a1a1a !important;
+}
+
+[data-testid="stMarkdownContainer"] {
+    color: #1a1a1a !important;
+}
+
+/* Buttons */
+.stButton > button {
+    background-color: #ffffff !important;
+    color: #1a1a1a !important;
+    border: 1px solid #d1d5db !important;
+}
+
+.stButton > button:hover {
+    background-color: #f3f4f6 !important;
+    border-color: #9ca3af !important;
+}
+
+.stButton > button[kind="primary"] {
+    background-color: #0891b2 !important;
+    color: white !important;
+    border: none !important;
+}
+
+.stButton > button[kind="primary"]:hover {
+    background-color: #0e7490 !important;
+}
+
+.stButton > button[kind="secondary"] {
+    background-color: #f3f4f6 !important;
+    color: #1a1a1a !important;
+}
+
+/* Input fields */
+input, textarea, [data-baseweb="input"] {
+    background-color: #ffffff !important;
+    color: #1a1a1a !important;
+    border-color: #d1d5db !important;
+}
+
+/* Selectbox */
+[data-baseweb="select"] {
+    background-color: #ffffff !important;
+    color: #1a1a1a !important;
+    cursor: pointer;
+}
+
+[data-baseweb="select"] input {
+    pointer-events: none;
+    cursor: pointer;
+    caret-color: transparent;
+    color: #1a1a1a !important;
+}
+
+[data-baseweb="select"] > div {
+    background-color: #ffffff !important;
+    color: #1a1a1a !important;
+}
+
+/* Radio buttons */
+[data-testid="stRadio"] label {
+    color: #1a1a1a !important;
+}
+
+/* Checkboxes */
+[data-testid="stCheckbox"] label {
+    color: #1a1a1a !important;
+}
+
+/* Metrics */
+[data-testid="stMetric"] {
+    background-color: #f8f9fa !important;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+[data-testid="stMetric"] label {
+    color: #6c757d !important;
+}
+
+[data-testid="stMetric"] [data-testid="stMetricValue"] {
+    color: #1a1a1a !important;
 }
 
 /* Metric cards */
@@ -188,11 +364,13 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
     margin: 0;
     font-size: 2.5em;
     font-weight: bold;
+    color: white !important;
 }
 .metric-card p {
     margin: 5px 0 0 0;
     font-size: 1.1em;
     opacity: 0.95;
+    color: white !important;
 }
 .metric-good {
     background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
@@ -216,19 +394,19 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
 
 /* Tables */
 [data-testid="stDataFrame"] {
-    background-color: rgba(0,0,0,0.02);
+    background-color: #f8f9fa;
     border-radius: 8px;
     padding: 10px;
 }
 
-/* Selectbox - jen dropdown */
-[data-baseweb="select"] input {
-    pointer-events: none;
-    cursor: pointer;
-    caret-color: transparent;
+/* Expanders */
+[data-testid="stExpander"] {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
 }
-[data-baseweb="select"] {
-    cursor: pointer;
+
+[data-testid="stExpander"] summary {
+    color: #1a1a1a !important;
 }
 </style>
 """, unsafe_allow_html=True)
