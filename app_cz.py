@@ -24,49 +24,38 @@ if 'authenticated' not in st.session_state:
 if not st.session_state.authenticated:
     st.markdown("""
     <style>
-    /* Login page styles */
-    .login-page {
+    /* Hide sidebar on login */
+    [data-testid="stSidebar"] {
+        display: none;
+    }
+    /* Center login page */
+    .block-container {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        min-height: 100vh !important;
+        padding-top: 0 !important;
+        max-width: 500px !important;
+        margin: 0 auto !important;
+    }
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%) !important;
+    }
+    /* Centered content */
+    .element-container {
+        text-align: center !important;
+    }
+    .stImage {
         display: flex;
         justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
-    }
-    .login-card {
-        background: white;
-        max-width: 450px;
-        width: 100%;
-        padding: 50px 40px;
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        text-align: center;
-    }
-    .login-logo {
-        width: 180px;
-        height: 180px;
-        margin: 0 auto 30px;
-    }
-    .login-logo img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-    .login-title {
-        color: #1e3c72;
-        font-size: 28px;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-    .login-subtitle {
-        color: #6c757d;
-        font-size: 16px;
-        margin-bottom: 35px;
+        margin-bottom: 20px;
     }
     .stTextInput > div > div > input {
         border-radius: 10px;
         border: 2px solid #e0e0e0;
         padding: 12px 15px;
         font-size: 16px;
+        text-align: center;
     }
     .stTextInput > div > div > input:focus {
         border-color: #2a5298;
@@ -82,41 +71,36 @@ if not st.session_state.authenticated:
     </style>
     """, unsafe_allow_html=True)
 
-    # Center everything
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        # Logo
-        try:
-            st.image("assets/logo.png", width=180)
-        except:
-            st.markdown('<div style="text-align: center; font-size: 80px; margin-bottom: 20px;">🍔</div>', unsafe_allow_html=True)
+    # Logo - centered
+    try:
+        st.image("assets/logo.png", width=180)
+    except:
+        st.markdown('<div style="text-align: center; font-size: 80px; margin-bottom: 20px;">🍔</div>', unsafe_allow_html=True)
 
-        # Title
-        st.markdown('<div class="login-title">Bouda Burgers</div>', unsafe_allow_html=True)
-        st.markdown('<div class="login-subtitle">KPI Dashboard - Přihlášení</div>', unsafe_allow_html=True)
+    # Title - centered
+    st.markdown('<h2 style="text-align: center; color: white; margin-bottom: 5px; font-size: 28px;">Bouda Burgers</h2>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: rgba(255,255,255,0.8); margin-bottom: 30px; font-size: 16px;">KPI Dashboard - Přihlášení</p>', unsafe_allow_html=True)
 
-        st.markdown("---")
+    # Try to get password from secrets, fallback to demo password
+    try:
+        correct_password = st.secrets["passwords"]["admin"]
+    except:
+        correct_password = "resto2025"  # Default password if secrets not configured
+        st.warning("⚠️ Používá se výchozí heslo")
 
-        # Try to get password from secrets, fallback to demo password
-        try:
-            correct_password = st.secrets["passwords"]["admin"]
-        except:
-            correct_password = "resto2025"  # Default password if secrets not configured
-            st.warning("⚠️ Používá se výchozí heslo")
+    password = st.text_input("🔒 Heslo", type="password", key="login_password", label_visibility="collapsed", placeholder="Zadejte heslo")
 
-        password = st.text_input("🔒 Heslo", type="password", key="login_password", label_visibility="collapsed", placeholder="Zadejte heslo")
+    if st.button("🔓 Přihlásit se", use_container_width=True, type="primary"):
+        if password == correct_password:
+            st.session_state.authenticated = True
+            st.success("✅ Přihlášení úspěšné!")
+            st.rerun()
+        else:
+            st.error("❌ Nesprávné heslo!")
 
-        if st.button("🔓 Přihlásit se", use_container_width=True, type="primary"):
-            if password == correct_password:
-                st.session_state.authenticated = True
-                st.success("✅ Přihlášení úspěšné!")
-                st.rerun()
-            else:
-                st.error("❌ Nesprávné heslo!")
-
-        # Show hint only in development
-        if correct_password == "resto2025":
-            st.markdown('<p style="text-align: center; margin-top: 25px; color: #999; font-size: 14px;">💡 Demo heslo: resto2025</p>', unsafe_allow_html=True)
+    # Show hint only in development
+    if correct_password == "resto2025":
+        st.markdown('<p style="text-align: center; margin-top: 25px; color: rgba(255,255,255,0.6); font-size: 14px;">💡 Demo heslo: resto2025</p>', unsafe_allow_html=True)
 
     st.stop()
 
@@ -142,27 +126,55 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
     border-right: 1px solid #30363d;
 }
 
-/* Compact sidebar */
+/* Compact sidebar - very small */
 [data-testid="stSidebar"] .element-container {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.2rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio > div {
-    gap: 0.3rem;
+    gap: 0.1rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio label {
-    padding: 0.3rem 0;
-    font-size: 14px;
+    padding: 0.2rem 0 !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox label {
-    font-size: 14px;
-    margin-bottom: 0.25rem;
+    font-size: 11px !important;
+    margin-bottom: 0.15rem !important;
+    font-weight: 600 !important;
+}
+
+[data-testid="stSidebar"] .stSelectbox > div {
+    font-size: 12px !important;
 }
 
 [data-testid="stSidebar"] hr {
-    margin: 0.5rem 0;
+    margin: 0.3rem 0 !important;
+    opacity: 0.3;
+}
+
+[data-testid="stSidebar"] h3 {
+    font-size: 14px !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+
+[data-testid="stSidebar"] p {
+    font-size: 10px !important;
+    margin: 0 !important;
+    line-height: 1.1 !important;
+}
+
+[data-testid="stSidebar"] .stButton > button {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+    font-size: 10px !important;
 }
 
 [data-testid="stHeader"] {
@@ -329,27 +341,55 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
     border-right: 1px solid #dee2e6;
 }
 
-/* Compact sidebar */
+/* Compact sidebar - very small */
 [data-testid="stSidebar"] .element-container {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.2rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio > div {
-    gap: 0.3rem;
+    gap: 0.1rem !important;
 }
 
 [data-testid="stSidebar"] .stRadio label {
-    padding: 0.3rem 0;
-    font-size: 14px;
+    padding: 0.2rem 0 !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox label {
-    font-size: 14px;
-    margin-bottom: 0.25rem;
+    font-size: 11px !important;
+    margin-bottom: 0.15rem !important;
+    font-weight: 600 !important;
+}
+
+[data-testid="stSidebar"] .stSelectbox > div {
+    font-size: 12px !important;
 }
 
 [data-testid="stSidebar"] hr {
-    margin: 0.5rem 0;
+    margin: 0.3rem 0 !important;
+    opacity: 0.3;
+}
+
+[data-testid="stSidebar"] h3 {
+    font-size: 14px !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+
+[data-testid="stSidebar"] p {
+    font-size: 10px !important;
+    margin: 0 !important;
+    line-height: 1.1 !important;
+}
+
+[data-testid="stSidebar"] .stButton > button {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+    font-size: 10px !important;
 }
 
 [data-testid="stHeader"] {
@@ -550,36 +590,36 @@ if 'dark_mode' not in st.session_state:
 
 # SIDEBAR
 with st.sidebar:
-    # Logo and title
+    # Logo and title - very compact
     col_logo, col_space = st.columns([1, 3])
     with col_logo:
         try:
-            st.image("assets/logo.png", width=60)
+            st.image("assets/logo.png", width=45)
         except:
-            st.markdown('<div style="font-size: 50px; text-align: center;">🍔</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size: 35px; text-align: center;">🍔</div>', unsafe_allow_html=True)
 
-    st.markdown('<h3 style="margin-top: -10px; font-size: 18px; font-weight: bold;">Bouda Burgers</h3>', unsafe_allow_html=True)
-    st.markdown('<p style="margin-top: -15px; font-size: 12px; color: #666;">KPI Dashboard v3</p>', unsafe_allow_html=True)
+    st.markdown('<h3 style="margin-top: -10px; font-size: 14px; font-weight: bold;">Bouda Burgers</h3>', unsafe_allow_html=True)
+    st.markdown('<p style="margin-top: -12px; font-size: 10px; color: #666; line-height: 1;">KPI Dashboard</p>', unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # Category selector - compact
-    category = st.radio("📁 Kategorie", [
+    # Category selector - very compact
+    category = st.radio("Kategorie", [
         "Provozní KPI",
         "Marketing KPI",
         "⚙️ Admin"
-    ], horizontal=False)
+    ], horizontal=False, label_visibility="collapsed")
 
     st.markdown("---")
 
     # Page navigation based on category
     if category == "Provozní KPI":
-        page = st.radio("📌 Navigace", [
+        page = st.radio("Navigace", [
             "📊 Přehled",
-            "📈 Detailní přehled",
+            "📈 Detail",
             "👥 Porovnání",
-            "📝 Zadání dat"
-        ])
+            "📝 Zadání"
+        ], label_visibility="collapsed")
     elif category == "Marketing KPI":
         page = "Marketing KPI"
         st.info("🚧 Sekce v přípravě\n\nMarketing KPI budou přidány v budoucí verzi.")
@@ -599,7 +639,7 @@ with st.sidebar:
     month_options = {format_month(m): m for m in months} if months else {format_month(default_month_str): default_month_str}
 
     selected_formatted = st.selectbox(
-        "📅 Hlavní měsíc:",
+        "📅 Měsíc",
         options=list(month_options.keys()),
         index=0,
         key="main_month_select"
@@ -608,8 +648,7 @@ with st.sidebar:
 
     # Comparison month selector (only for Provozní KPI pages)
     if category == "Provozní KPI":
-        st.markdown("---")
-        comparison_options = ["❌ Žádné porovnání"] + [f"🔄 vs {format_month(m)}" for m in months if m != selected_month]
+        comparison_options = ["Bez porovnání"] + [f"vs {format_month(m)}" for m in months if m != selected_month]
 
         if len(months) > 1:
             # Try to select previous month as default
@@ -622,41 +661,35 @@ with st.sidebar:
             default_comparison_idx = 0
 
         comparison_selection = st.selectbox(
-            "📊 Porovnat s měsícem:",
+            "📊 Porovnání",
             options=comparison_options,
             index=default_comparison_idx,
             key="comparison_month_select"
         )
 
-        if comparison_selection == "❌ Žádné porovnání":
+        if comparison_selection == "Bez porovnání":
             comparison_month = None
         else:
             # Extract month from selection
-            comparison_formatted = comparison_selection.replace("🔄 vs ", "")
+            comparison_formatted = comparison_selection.replace("vs ", "")
             comparison_month = month_options.get(comparison_formatted)
     else:
         comparison_month = None
 
-    st.caption(f"Zvolený měsíc: {format_month(selected_month)}")
-    if comparison_month:
-        st.caption(f"Porovnání: {format_month(comparison_month)}")
-    st.caption(f"🕐 {datetime.now().strftime('%d.%m.%Y %H:%M')}")
-
-    # Logout button
+    # Logout and theme buttons
     st.markdown("---")
-    if st.button("🚪 Odhlásit se", use_container_width=True):
+    if st.button("🚪 Odhlásit", use_container_width=True):
         st.session_state.authenticated = False
         st.rerun()
 
-    # Theme switch buttons at bottom
-    st.markdown("---")
+    # Theme switch buttons
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("☀️ Light", use_container_width=True, type="primary" if not st.session_state.get('dark_mode', True) else "secondary"):
+        if st.button("☀️", use_container_width=True, type="primary" if not st.session_state.get('dark_mode', True) else "secondary"):
             st.session_state.dark_mode = False
             st.rerun()
     with col2:
-        if st.button("🌙 Dark", use_container_width=True, type="primary" if st.session_state.get('dark_mode', True) else "secondary"):
+        if st.button("🌙", use_container_width=True, type="primary" if st.session_state.get('dark_mode', True) else "secondary"):
             st.session_state.dark_mode = True
             st.rerun()
 
