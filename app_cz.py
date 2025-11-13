@@ -1300,8 +1300,8 @@ elif page == "⚙️ Admin":
                     st.error(msg)
 
             st.markdown("---")
-            st.markdown("#### ✏️ Upravit existující hranici")
             if not thresholds.empty:
+                st.markdown("#### ✏️ Upravit existující hranici")
                 col1, col2 = st.columns(2)
                 with col1:
                     threshold_edit_descriptions = [f"{row['operator']} {row['min_hodnota']}" +
@@ -1350,8 +1350,8 @@ elif page == "⚙️ Admin":
                         st.error(msg)
 
             st.markdown("---")
-            st.markdown("#### 🗑️ Smazat hranici")
             if not thresholds.empty:
+                st.markdown("#### 🗑️ Smazat hranici")
                 col1, col2 = st.columns(2)
                 with col1:
                     threshold_descriptions = [f"{row['operator']} {row['min_hodnota']}" +
