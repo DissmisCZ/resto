@@ -28,6 +28,10 @@ if not st.session_state.authenticated:
     [data-testid="stSidebar"] {
         display: none;
     }
+    /* White background */
+    [data-testid="stAppViewContainer"], [data-testid="stApp"], html, body {
+        background-color: #ffffff !important;
+    }
     /* Center login page */
     .block-container {
         display: flex !important;
@@ -35,49 +39,67 @@ if not st.session_state.authenticated:
         align-items: center !important;
         min-height: 100vh !important;
         padding-top: 0 !important;
-        max-width: 500px !important;
+        max-width: 400px !important;
         margin: 0 auto !important;
-    }
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%) !important;
     }
     /* Centered content */
     .element-container {
-        text-align: center !important;
+        width: 100% !important;
+        max-width: 400px !important;
+        margin: 0 auto !important;
     }
     .stImage {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
-        margin: 0 auto 20px auto !important;
+        margin: 0 auto 25px auto !important;
     }
     .stImage > img {
         margin: 0 auto !important;
         display: block !important;
     }
+    /* Aligned input */
+    .stTextInput {
+        width: 100% !important;
+        max-width: 400px !important;
+        margin: 0 auto !important;
+    }
     .stTextInput > div > div > input {
         border-radius: 10px;
-        border: 2px solid #e0e0e0;
-        padding: 12px 15px;
+        border: 2px solid #d1d5db;
+        padding: 14px 16px;
         font-size: 16px;
-        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
     }
     .stTextInput > div > div > input:focus {
-        border-color: #2a5298;
-        box-shadow: 0 0 0 2px rgba(42,82,152,0.1);
+        border-color: #0891b2;
+        box-shadow: 0 0 0 3px rgba(8,145,178,0.1);
+    }
+    /* Aligned button */
+    .stButton {
+        width: 100% !important;
+        max-width: 400px !important;
+        margin: 0 auto !important;
     }
     .stButton > button {
         border-radius: 10px;
-        padding: 12px 30px;
+        padding: 14px 30px;
         font-size: 16px;
         font-weight: 600;
-        margin-top: 10px;
+        margin-top: 15px;
+        width: 100% !important;
+    }
+    /* Warning alignment */
+    .stAlert {
+        max-width: 400px !important;
+        margin: 15px auto !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # Logo - perfectly centered using columns
+    # Logo - perfectly centered
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         try:
@@ -86,8 +108,8 @@ if not st.session_state.authenticated:
             st.markdown('<div style="text-align: center; font-size: 80px; margin-bottom: 20px;">🍔</div>', unsafe_allow_html=True)
 
     # Title - centered
-    st.markdown('<h2 style="text-align: center; color: white; margin-bottom: 5px; font-size: 28px;">Bouda Burgers</h2>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; color: rgba(255,255,255,0.8); margin-bottom: 30px; font-size: 16px;">KPI Dashboard - Přihlášení</p>', unsafe_allow_html=True)
+    st.markdown('<h2 style="text-align: center; color: #1a1a1a; margin: 10px 0 5px 0; font-size: 32px; font-weight: bold;">Bouda Burgers</h2>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #6b7280; margin-bottom: 35px; font-size: 16px;">KPI Dashboard - Přihlášení</p>', unsafe_allow_html=True)
 
     # Try to get password from secrets, fallback to demo password
     try:
@@ -98,7 +120,7 @@ if not st.session_state.authenticated:
 
     password = st.text_input("🔒 Heslo", type="password", key="login_password", label_visibility="collapsed", placeholder="Zadejte heslo")
 
-    if st.button("🔓 Přihlásit se", use_container_width=True, type="primary"):
+    if st.button("🔓 Přihlásit se", type="primary"):
         if password == correct_password:
             st.session_state.authenticated = True
             st.success("✅ Přihlášení úspěšné!")
@@ -108,7 +130,7 @@ if not st.session_state.authenticated:
 
     # Show hint only in development
     if correct_password == "resto2025":
-        st.markdown('<p style="text-align: center; margin-top: 25px; color: rgba(255,255,255,0.6); font-size: 14px;">💡 Demo heslo: resto2025</p>', unsafe_allow_html=True)
+        st.markdown('<p style="text-align: center; margin-top: 25px; color: #9ca3af; font-size: 14px;">💡 Demo heslo: resto2025</p>', unsafe_allow_html=True)
 
     st.stop()
 
