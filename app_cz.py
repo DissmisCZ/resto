@@ -77,39 +77,70 @@ if not st.session_state.authenticated:
 # MAIN APPLICATION
 # ============================================================================
 
-# Dark theme CSS
-st.markdown("""
+# Theme CSS
+theme_class = "dark-mode" if st.session_state.dark_mode else "light-mode"
+st.markdown(f"""
 <style>
-/* Lepší kontrast a čitelnost */
-.metric-card {
+/* Light/Dark mode variables */
+.light-mode {{
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6c757d;
+    --border-color: #dee2e6;
+    --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}}
+
+.dark-mode {{
+    --bg-primary: #0e1117;
+    --bg-secondary: #262730;
+    --text-primary: #fafafa;
+    --text-secondary: #a0a0a0;
+    --border-color: #30363d;
+    --card-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}}
+
+/* Apply theme */
+html, body, [data-testid="stAppViewContainer"] {{
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}}
+
+[data-testid="stSidebar"] {{
+    background-color: var(--bg-secondary) !important;
+    border-right: 1px solid var(--border-color);
+}}
+
+/* Metric cards */
+.metric-card {{
     background: linear-gradient(135deg, #1f77b4 0%, #2a8fbc 100%);
     padding: 20px;
     border-radius: 8px;
     color: white;
     text-align: center;
     margin-bottom: 15px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-.metric-card h2 {
+    box-shadow: var(--card-shadow);
+}}
+.metric-card h2 {{
     margin: 0;
     font-size: 2.5em;
     font-weight: bold;
-}
-.metric-card p {
+}}
+.metric-card p {{
     margin: 5px 0 0 0;
     font-size: 1.1em;
     opacity: 0.95;
-}
-.metric-good {
+}}
+.metric-good {{
     background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
-}
-.metric-bad {
+}}
+.metric-bad {{
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-}
-.metric-medium {
+}}
+.metric-medium {{
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-}
-.success-banner {
+}}
+.success-banner {{
     background-color: #22c55e;
     color: white;
     padding: 15px;
@@ -118,23 +149,110 @@ st.markdown("""
     text-align: center;
     font-weight: bold;
     font-size: 1.1em;
-}
-/* Zlepšení viditelnosti tabulek */
-[data-testid="stDataFrame"] {
+}}
+
+/* Tables */
+[data-testid="stDataFrame"] {{
     background-color: rgba(255,255,255,0.05);
     border-radius: 8px;
     padding: 10px;
-}
-/* Zakázat psaní do selectbox - jen dropdown */
-[data-baseweb="select"] input {
+}}
+
+/* Selectbox - jen dropdown */
+[data-baseweb="select"] input {{
     pointer-events: none;
     cursor: pointer;
     caret-color: transparent;
-}
-[data-baseweb="select"] {
+}}
+[data-baseweb="select"] {{
     cursor: pointer;
-}
+}}
+
+/* Theme Toggle Switch */
+.theme-toggle {{
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 999;
+}}
+
+.theme-switch {{
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}}
+
+.theme-switch input {{
+    opacity: 0;
+    width: 0;
+    height: 0;
+}}
+
+.slider {{
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 34px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}}
+
+.slider:before {{
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}}
+
+.slider:after {{
+    content: '🌙';
+    position: absolute;
+    left: 8px;
+    top: 7px;
+    font-size: 18px;
+    transition: all 0.4s;
+    opacity: 1;
+}}
+
+input:checked + .slider {{
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}}
+
+input:checked + .slider:before {{
+    transform: translateX(26px);
+}}
+
+input:checked + .slider:after {{
+    content: '☀️';
+    left: 34px;
+    opacity: 1;
+}}
+
+.slider:hover {{
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
+}}
+
+.theme-label {{
+    color: var(--text-primary);
+    font-size: 12px;
+    text-align: center;
+    margin-top: 5px;
+    font-weight: 500;
+}}
 </style>
+<div class="{theme_class}"></div>
 """, unsafe_allow_html=True)
 
 # Init DB
@@ -178,6 +296,8 @@ if 'save_message' not in st.session_state:
     st.session_state.save_message = None
 if 'save_message_type' not in st.session_state:
     st.session_state.save_message_type = None
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = True  # Default: dark mode
 
 # SIDEBAR
 with st.sidebar:
@@ -266,6 +386,33 @@ with st.sidebar:
     st.markdown("---")
     if st.button("🚪 Odhlásit se", use_container_width=True):
         st.session_state.authenticated = False
+        st.rerun()
+
+    # Theme toggle at bottom
+    st.markdown("---")
+    theme_label = "🌙 Dark Mode" if st.session_state.dark_mode else "☀️ Light Mode"
+
+    # HTML toggle switch
+    toggle_html = f"""
+    <div class="theme-toggle">
+        <label class="theme-switch">
+            <input type="checkbox" {'checked' if not st.session_state.dark_mode else ''}
+                   onclick="window.parent.postMessage({{type: 'streamlit:setComponentValue', value: !{str(st.session_state.dark_mode).lower()}}}, '*')">
+            <span class="slider"></span>
+        </label>
+        <div class="theme-label">{theme_label}</div>
+    </div>
+    """
+
+    # Streamlit checkbox (hidden, but functional)
+    new_mode = st.checkbox(
+        theme_label,
+        value=not st.session_state.dark_mode,
+        key="theme_toggle_checkbox"
+    )
+
+    if new_mode != (not st.session_state.dark_mode):
+        st.session_state.dark_mode = not new_mode
         st.rerun()
 
 
