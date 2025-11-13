@@ -1140,12 +1140,66 @@ elif page == "⚙️ Admin":
             dept_id = safe_int_id(depts[depts['nazev'] == new_mgr_dept]['id'].values[0])
         with col3:
             if st.button("➕ Přidat provozního", key="add_mgr_btn"):
-                success, msg = db.add_operational_manager(new_mgr_name, dept_id)
+                success, msg, new_mgr_id = db.add_operational_manager(new_mgr_name, dept_id)
                 if success:
                     st.success(msg)
                     st.rerun()
                 else:
                     st.error(msg)
+
+        st.markdown("---")
+        st.markdown("#### 🎯 Nastavit KPI pro provozního")
+
+        if len(mgrs) > 0:
+            col1, col2 = st.columns([1, 2])
+
+            with col1:
+                selected_mgr = st.selectbox("Vyberte provozního:", mgrs['jmeno'].tolist(), key="mgr_kpi_select")
+                selected_mgr_id = safe_int_id(mgrs[mgrs['jmeno'] == selected_mgr]['id'].values[0])
+
+            with col2:
+                st.caption(f"Nastavení KPI pro: **{selected_mgr}**")
+
+            # Get all KPIs
+            all_kpis = db.get_all_kpi_definitions()
+
+            if not all_kpis.empty:
+                # Get currently assigned KPIs
+                assigned_kpis = db.get_manager_kpis(selected_mgr_id)
+                assigned_kpi_ids = assigned_kpis['id'].tolist() if not assigned_kpis.empty else []
+
+                st.markdown("**Vyberte KPI která se budou sledovat:**")
+
+                # Create checkboxes for each KPI
+                selected_kpi_ids = []
+                for _, kpi in all_kpis.iterrows():
+                    kpi_id = safe_int_id(kpi['id'])
+                    is_checked = kpi_id in assigned_kpi_ids
+
+                    if st.checkbox(
+                        f"{kpi['nazev']} ({kpi['jednotka']}) - {kpi['popis'][:50]}..." if len(str(kpi['popis'])) > 50 else f"{kpi['nazev']} ({kpi['jednotka']})",
+                        value=is_checked,
+                        key=f"mgr_kpi_{selected_mgr_id}_{kpi_id}"
+                    ):
+                        selected_kpi_ids.append(kpi_id)
+
+                if st.button("💾 Uložit výběr KPI", key="save_mgr_kpi_btn", type="primary"):
+                    success, msg = db.set_manager_kpis(selected_mgr_id, selected_kpi_ids)
+                    if success:
+                        st.success(msg)
+                        st.rerun()
+                    else:
+                        st.error(msg)
+
+                # Show current assignments
+                if not assigned_kpis.empty:
+                    st.info(f"✅ Aktuálně přiřazeno: {', '.join(assigned_kpis['nazev'].tolist())}")
+                else:
+                    st.warning("⚠️ Žádná KPI nejsou přiřazena - vyberte aspoň jedno")
+            else:
+                st.warning("⚠️ Nejdříve vytvořte KPI v tabu 'KPI Definice'")
+        else:
+            st.info("Nejdříve přidejte provozního")
 
         st.markdown("---")
         st.markdown("#### 🗑️ Smazat provozního")

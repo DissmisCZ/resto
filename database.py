@@ -105,6 +105,19 @@ def init_database():
         )
     """)
 
+    # === MANAGER KPI ASSIGNMENTS (Přiřazení KPI k provozním) ===
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS manager_kpi_assignments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            manager_id INTEGER NOT NULL,
+            kpi_id INTEGER NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(manager_id, kpi_id),
+            FOREIGN KEY (manager_id) REFERENCES operational_managers(id) ON DELETE CASCADE,
+            FOREIGN KEY (kpi_id) REFERENCES kpi_definitions(id) ON DELETE CASCADE
+        )
+    """)
+
     # === MONTHLY KPI DATA (Měsíční vstupní data) - KLÍČOVÁ TABULKA ===
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS monthly_kpi_data (
@@ -437,11 +450,51 @@ def add_operational_manager(jmeno, department_id, email=None):
             VALUES (?, ?, ?)
         """, (jmeno, department_id, email))
         conn.commit()
+        new_id = cursor.lastrowid
         conn.close()
-        return True, f"Provozní '{jmeno}' přidán"
+        return True, f"Provozní '{jmeno}' přidán", new_id
     except Exception as e:
         conn.close()
-        return False, str(e)
+        return False, str(e), None
+
+def get_manager_kpis(manager_id):
+    """Get all KPIs assigned to a manager"""
+    conn = get_connection()
+    df = pd.read_sql_query("""
+        SELECT k.id, k.nazev, k.jednotka, k.popis
+        FROM manager_kpi_assignments a
+        JOIN kpi_definitions k ON a.kpi_id = k.id
+        WHERE a.manager_id = ? AND k.aktivni = 1
+        ORDER BY k.poradi
+    """, conn, params=(manager_id,))
+    conn.close()
+    return df
+
+def set_manager_kpis(manager_id, kpi_ids):
+    """Set all KPIs for a manager (replaces existing)"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Ensure IDs are integers
+        manager_id = int(manager_id)
+        kpi_ids = [int(k) for k in kpi_ids] if kpi_ids else []
+
+        # Remove all existing assignments
+        cursor.execute("DELETE FROM manager_kpi_assignments WHERE manager_id = ?", (manager_id,))
+
+        # Add new assignments
+        for kpi_id in kpi_ids:
+            cursor.execute("""
+                INSERT INTO manager_kpi_assignments (manager_id, kpi_id)
+                VALUES (?, ?)
+            """, (manager_id, kpi_id))
+
+        conn.commit()
+        conn.close()
+        return True, f"KPI nastavena ({len(kpi_ids)} vybraných)"
+    except Exception as e:
+        conn.close()
+        return False, f"Chyba: {str(e)}"
 
 # ============ KPI DEFINITIONS & THRESHOLDS ============
 
