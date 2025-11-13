@@ -5,7 +5,24 @@
 ![Version](https://img.shields.io/badge/version-3.1-blue)
 ![Python](https://img.shields.io/badge/python-3.8+-green)
 ![Streamlit](https://img.shields.io/badge/streamlit-1.28+-orange)
+![PostgreSQL](https://img.shields.io/badge/postgresql-supported-blue)
 ![Status](https://img.shields.io/badge/status-production-brightgreen)
+![Cloud](https://img.shields.io/badge/cloud-ready-success)
+
+---
+
+## 🚀 Quick Start
+
+### Lokální spuštění
+```bash
+pip install -r requirements.txt
+streamlit run app_cz.py
+```
+
+### Cloud deployment (Streamlit + Supabase)
+Kompletní návod: **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**
+
+**Demo přihlášení:** `resto2025` (změňte v produkci!)
 
 ---
 
@@ -13,18 +30,25 @@
 
 1. [O projektu](#o-projektu)
 2. [Nové ve v3.1](#nové-ve-v31)
-3. [Instalace](#instalace)
-4. [Spuštění](#spuštění)
-5. [Funkce](#funkce)
-6. [Autentizace](#autentizace)
-7. [Struktura dat](#struktura-dat)
-8. [Troubleshooting](#troubleshooting)
+3. [Cloud Deployment](#-cloud-deployment-nové-v31)
+4. [Instalace](#instalace)
+5. [Spuštění](#spuštění)
+6. [Funkce](#funkce)
+7. [Autentizace](#autentizace)
+8. [Struktura dat](#struktura-dat)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
 ## O projektu
 
 RESTO v3.1 je **kompletně nezávislá** aplikace pro správu operačních KPI restaurací Bouda Burgers s moderním designem a pokročilými funkcemi.
+
+### ⭐ Nově v3.1: Cloud Database Support!
+- ✅ **Supabase PostgreSQL** - Perzistentní cloudová databáze (500MB zdarma)
+- ✅ **Automatická migrace** - Přenos dat z lokální SQLite jedním příkazem
+- ✅ **Streamlit Cloud ready** - Nasaďte aplikaci za 5 minut
+- ✅ **Denní zálohy** - Supabase automaticky zálohuje data
 
 ### Klíčové rysy:
 - ✅ **Autentizace** - zabezpečené přihlášení
