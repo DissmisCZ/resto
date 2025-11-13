@@ -78,7 +78,7 @@ if not st.session_state.authenticated:
 # ============================================================================
 
 # Theme CSS
-theme_class = "dark-mode" if st.session_state.dark_mode else "light-mode"
+theme_class = "dark-mode" if st.session_state.get('dark_mode', True) else "light-mode"
 st.markdown(f"""
 <style>
 /* Light/Dark mode variables */
