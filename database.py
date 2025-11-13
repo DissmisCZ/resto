@@ -1116,46 +1116,32 @@ def add_kpi_threshold(kpi_id, operator, bonus_procento, min_hodnota=None, max_ho
         conn.close()
         return False, str(e), None
 
-def update_kpi_threshold(threshold_id, min_hodnota=None, max_hodnota=None, operator=None, bonus_procento=None, popis=None, poradi=None):
-    """Update KPI threshold"""
+def update_kpi_threshold(threshold_id, min_hodnota, max_hodnota, operator, bonus_procento, popis, poradi):
+    """Update KPI threshold - updates all fields"""
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        updates = []
-        params = []
+        cursor.execute("""
+            UPDATE kpi_thresholds
+            SET min_hodnota = ?,
+                max_hodnota = ?,
+                operator = ?,
+                bonus_procento = ?,
+                popis = ?,
+                poradi = ?
+            WHERE id = ?
+        """, (min_hodnota, max_hodnota, operator, bonus_procento, popis, poradi, threshold_id))
 
-        if min_hodnota is not None:
-            updates.append("min_hodnota = ?")
-            params.append(min_hodnota)
-        if max_hodnota is not None:
-            updates.append("max_hodnota = ?")
-            params.append(max_hodnota)
-        if operator is not None:
-            updates.append("operator = ?")
-            params.append(operator)
-        if bonus_procento is not None:
-            updates.append("bonus_procento = ?")
-            params.append(bonus_procento)
-        if popis is not None:
-            updates.append("popis = ?")
-            params.append(popis)
-        if poradi is not None:
-            updates.append("poradi = ?")
-            params.append(poradi)
-
-        if not updates:
+        if cursor.rowcount == 0:
             conn.close()
-            return False, "Žádné změny"
+            return False, "Hranice nenalezena"
 
-        params.append(threshold_id)
-        query = f"UPDATE kpi_thresholds SET {', '.join(updates)} WHERE id = ?"
-        cursor.execute(query, params)
         conn.commit()
         conn.close()
         return True, "Hranice upravena"
     except Exception as e:
         conn.close()
-        return False, str(e)
+        return False, f"Chyba: {str(e)}"
 
 def delete_kpi_threshold(threshold_id):
     """Delete KPI threshold"""
@@ -1163,12 +1149,17 @@ def delete_kpi_threshold(threshold_id):
     cursor = conn.cursor()
     try:
         cursor.execute("DELETE FROM kpi_thresholds WHERE id = ?", (threshold_id,))
+
+        if cursor.rowcount == 0:
+            conn.close()
+            return False, "Hranice nenalezena"
+
         conn.commit()
         conn.close()
         return True, "Hranice smazána"
     except Exception as e:
         conn.close()
-        return False, str(e)
+        return False, f"Chyba: {str(e)}"
 
 # ============ DEPARTMENT VLASTNI KPI FUNCTIONS ============
 

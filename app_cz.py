@@ -80,37 +80,50 @@ if not st.session_state.authenticated:
 # Dark theme CSS
 st.markdown("""
 <style>
-:root {
-    --bg-dark: #0e1117;
-    --bg-darker: #010409;
-    --fg-light: #e8eaed;
-    --border-color: #30363d;
-}
-html, body, [data-testid="stAppViewContainer"] {
-    background-color: var(--bg-dark) !important;
-    color: var(--fg-light) !important;
-}
-[data-testid="stSidebar"] {
-    background-color: var(--bg-darker) !important;
-    border-right: 1px solid var(--border-color);
-}
+/* Lepší kontrast a čitelnost */
 .metric-card {
     background: linear-gradient(135deg, #1f77b4 0%, #2a8fbc 100%);
-    padding: 20px; border-radius: 10px; color: white; text-align: center;
-    margin-bottom: 10px;
+    padding: 20px;
+    border-radius: 8px;
+    color: white;
+    text-align: center;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
-.metric-good { background: linear-gradient(135deg, #2ca02c 0%, #3db83d 100%) !important; }
-.metric-bad { background: linear-gradient(135deg, #d62728 0%, #e63946 100%) !important; }
-.metric-medium { background: linear-gradient(135deg, #ff7f0e 0%, #ffb347 100%) !important; }
+.metric-card h2 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: bold;
+}
+.metric-card p {
+    margin: 5px 0 0 0;
+    font-size: 1.1em;
+    opacity: 0.95;
+}
+.metric-good {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+}
+.metric-bad {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+}
+.metric-medium {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+}
 .success-banner {
-    background-color: #2ca02c;
+    background-color: #22c55e;
     color: white;
     padding: 15px;
-    border-radius: 5px;
+    border-radius: 8px;
     margin-bottom: 20px;
     text-align: center;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 1.1em;
+}
+/* Zlepšení viditelnosti tabulek */
+[data-testid="stDataFrame"] {
+    background-color: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -150,17 +163,35 @@ if 'save_message' not in st.session_state:
     st.session_state.save_message = None
 if 'save_message_type' not in st.session_state:
     st.session_state.save_message_type = None
+if 'category' not in st.session_state:
+    st.session_state.category = "Provozní KPI"
 
 # SIDEBAR
 with st.sidebar:
     st.title("🍽️ RESTO v3")
-    page = st.radio("📌 Navigace", [
-        "📊 Přehled",
-        "📈 Detailní přehled",
-        "👥 Porovnání",
-        "📝 Zadání dat",
+
+    # Category selector
+    category = st.selectbox("📁 Kategorie:", [
+        "Provozní KPI",
+        "Marketing KPI",
         "⚙️ Admin"
-    ])
+    ], key="category_select")
+
+    st.markdown("---")
+
+    # Page navigation based on category
+    if category == "Provozní KPI":
+        page = st.radio("📌 Navigace", [
+            "📊 Přehled",
+            "📈 Detailní přehled",
+            "👥 Porovnání",
+            "📝 Zadání dat"
+        ])
+    elif category == "Marketing KPI":
+        page = "Marketing KPI"
+        st.info("🚧 Sekce v přípravě\n\nMarketing KPI budou přidány v budoucí verzi.")
+    else:  # Admin
+        page = "⚙️ Admin"
 
     st.markdown("---")
 
@@ -175,13 +206,47 @@ with st.sidebar:
     month_options = {format_month(m): m for m in months} if months else {format_month(default_month_str): default_month_str}
 
     selected_formatted = st.selectbox(
-        "Vyberte měsíc:",
+        "📅 Hlavní měsíc:",
         options=list(month_options.keys()),
-        index=0
+        index=0,
+        key="main_month_select"
     )
     selected_month = month_options[selected_formatted]
 
+    # Comparison month selector (only for Provozní KPI pages)
+    if category == "Provozní KPI":
+        st.markdown("---")
+        comparison_options = ["❌ Žádné porovnání"] + [f"🔄 vs {format_month(m)}" for m in months if m != selected_month]
+
+        if len(months) > 1:
+            # Try to select previous month as default
+            selected_month_idx = months.index(selected_month) if selected_month in months else 0
+            if selected_month_idx < len(months) - 1:
+                default_comparison_idx = 1  # Previous month
+            else:
+                default_comparison_idx = 0  # No comparison
+        else:
+            default_comparison_idx = 0
+
+        comparison_selection = st.selectbox(
+            "📊 Porovnat s měsícem:",
+            options=comparison_options,
+            index=default_comparison_idx,
+            key="comparison_month_select"
+        )
+
+        if comparison_selection == "❌ Žádné porovnání":
+            comparison_month = None
+        else:
+            # Extract month from selection
+            comparison_formatted = comparison_selection.replace("🔄 vs ", "")
+            comparison_month = month_options.get(comparison_formatted)
+    else:
+        comparison_month = None
+
     st.caption(f"Zvolený měsíc: {format_month(selected_month)}")
+    if comparison_month:
+        st.caption(f"Porovnání: {format_month(comparison_month)}")
     st.caption(f"🕐 {datetime.now().strftime('%d.%m.%Y %H:%M')}")
 
     # Logout button
@@ -363,17 +428,23 @@ elif page == "📈 Detailní přehled":
             st.markdown("### 📈 Graf porovnání bonusů")
 
             if selected_kpi == "Všechny":
-                # Group by manager and sum bonuses
-                bonus_summary = eval_with_manager.groupby('jmeno')['bonus_procento'].sum().reset_index()
-                bonus_summary.columns = ['Provozní', 'Celkový bonus (%)']
+                # Group by manager and calculate AVERAGE bonus (not sum!)
+                # This is correct because manager's bonus is average of all their locations
+                bonus_summary = eval_with_manager.groupby('jmeno').agg({
+                    'bonus_procento': 'mean',
+                    'location_id': 'count'  # Number of locations
+                }).reset_index()
+                bonus_summary.columns = ['Provozní', 'Průměrný bonus (%)', 'Počet lokalit']
+                bonus_summary['Průměrný bonus (%)'] = bonus_summary['Průměrný bonus (%)'].round(1)
 
                 fig = px.bar(
                     bonus_summary,
                     x='Provozní',
-                    y='Celkový bonus (%)',
-                    title='Celkové bonusy provozních',
-                    color='Celkový bonus (%)',
-                    color_continuous_scale=['red', 'yellow', 'green']
+                    y='Průměrný bonus (%)',
+                    title='Průměrný bonus provozních (ze všech lokalit)',
+                    color='Průměrný bonus (%)',
+                    color_continuous_scale=['red', 'yellow', 'green'],
+                    hover_data=['Počet lokalit']
                 )
             else:
                 # Show selected KPI across managers
@@ -835,6 +906,50 @@ elif page == "📝 Zadání dat":
 
 
 # ============================================================================
+# MARKETING KPI - PLACEHOLDER
+# ============================================================================
+elif page == "Marketing KPI":
+    st.title("📢 Marketing KPI")
+
+    st.info("🚧 **V přípravě**\n\nTato sekce bude obsahovat:")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("### 📊 Plánované metriky:")
+        st.markdown("""
+        - **Social Media**
+          - Dosah příspěvků
+          - Engagement rate
+          - Nové sledující
+
+        - **Online Marketing**
+          - Web traffic
+          - Konverzní poměr
+          - CTR kampaní
+
+        - **Brand Awareness**
+          - Zmínky značky
+          - Review skóre
+          - Net Promoter Score
+        """)
+
+    with col2:
+        st.markdown("### ⏱️ Časový plán:")
+        st.markdown("""
+        - **Q1 2025**: Návrh struktury
+        - **Q2 2025**: Implementace sběru dat
+        - **Q3 2025**: Spuštění sledování
+
+        💡 Máte návrhy na metriky?
+        Kontaktujte administrátora.
+        """)
+
+    st.markdown("---")
+    st.warning("⚠️ Sekce je dočasně nedostupná. Vraťte se prosím později.")
+
+
+# ============================================================================
 # PAGE 5: ADMIN
 # ============================================================================
 elif page == "⚙️ Admin":
@@ -1261,8 +1376,7 @@ elif page == "⚙️ Admin":
 
     # TAB 6: Debug & Diagnostics
     with tab6:
-        st.markdown("### 🔍 Diagnostika Databáze")
-        st.info("📊 Přehled dat v databázi - pomáhá identifikovat problémy")
+        st.markdown("### 🔍 Diagnostika")
 
         # Get database statistics
         conn = db.get_connection()
