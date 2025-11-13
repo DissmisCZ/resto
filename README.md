@@ -100,6 +100,30 @@ pip install -r requirements.txt
 
 ---
 
+## 🌐 Cloud Deployment (NOVÉ v3.1!)
+
+### Streamlit Cloud + Supabase PostgreSQL
+
+RESTO v3.1 nyní podporuje **perzistentní cloudovou databázi** s Supabase!
+
+**Výhody:**
+- ✅ **Perzistence** - Data přetrvávají i po restartu aplikace
+- ✅ **Zdarma** - 500MB PostgreSQL databáze zdarma
+- ✅ **Zálohování** - Automatické denní zálohy
+- ✅ **Přístup odkudkoli** - Aplikace dostupná 24/7 na webu
+
+**Jak na to:**
+1. Přečtěte si **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** - kompletní návod
+2. Vytvořte Supabase projekt (2 minuty)
+3. Migrujte data pomocí `migrate_sqlite_to_postgres.py`
+4. Nasaďte na Streamlit Cloud
+
+**Databázové možnosti:**
+- **Lokální**: SQLite (`database.py`) - pro vývoj a testování
+- **Cloud**: PostgreSQL (`database_postgres.py`) - pro produkci na Streamlit Cloud
+
+---
+
 ## Spuštění
 
 ### Lokální Spuštění (Production)
@@ -261,20 +285,24 @@ ODDĚLENÍ
 
 ```
 RESTO/
-├── app_cz.py                    # Hlavní aplikace
-├── database.py                  # Databázový modul
+├── app_cz.py                        # Hlavní aplikace
+├── database.py                      # Databázový modul (SQLite - lokální)
+├── database_postgres.py             # Databázový modul (PostgreSQL - cloud) ⭐ NOVÉ
+├── migrate_sqlite_to_postgres.py   # Migrační skript SQLite → PostgreSQL ⭐ NOVÉ
 ├── assets/
-│   └── logo.png                 # Logo Bouda Burgers
+│   └── logo.png                     # Logo Bouda Burgers
 ├── .streamlit/
-│   └── secrets.toml             # Hesla (NECOMMITOVAT!)
-├── resto_data.db               # SQLite databáze
-├── requirements.txt             # Python balíky
-├── run_resto_cz.bat            # Spuštění (production)
-├── run_resto_test.bat          # Spuštění (test)
-├── install_dependencies.bat    # Instalace balíků
-├── kill_resto.bat              # Vypnutí aplikace
-├── README.md                   # Tato dokumentace
-└── .gitignore                  # Git ignore pravidla
+│   └── secrets.toml                 # Hesla + database URL (NECOMMITOVAT!)
+├── resto_data.db                   # SQLite databáze (lokální)
+├── requirements.txt                 # Python balíky (s PostgreSQL závislostmi)
+├── run_resto_cz.bat                # Spuštění (production)
+├── run_resto_test.bat              # Spuštění (test)
+├── install_dependencies.bat        # Instalace balíků
+├── kill_resto.bat                  # Vypnutí aplikace
+├── README.md                       # Tato dokumentace
+├── SUPABASE_SETUP.md               # Návod pro cloud deployment ⭐ NOVÉ
+├── ZMENA_HESLA.md                  # Návod pro změnu hesla
+└── .gitignore                      # Git ignore pravidla
 ```
 
 ---
@@ -282,8 +310,20 @@ RESTO/
 ## Technické Detaily
 
 ### Databáze
+
+**Lokální (SQLite3):**
 - **Typ**: SQLite3 (resto_data.db)
-- **Tabulky**: 10 tabulek včetně:
+- **Modul**: database.py
+- **Použití**: Lokální vývoj a testování
+- **Backup**: Zkopírovat `resto_data.db`
+
+**Cloud (PostgreSQL):**
+- **Typ**: PostgreSQL (Supabase)
+- **Modul**: database_postgres.py
+- **Použití**: Produkce na Streamlit Cloud
+- **Backup**: Automatické denní zálohy Supabase
+
+**Společné tabulky (10):**
   - departments
   - locations
   - operational_managers
@@ -292,13 +332,15 @@ RESTO/
   - manager_kpi_assignments (NOVÉ)
   - monthly_kpi_data
   - monthly_kpi_evaluation
-  - department_summary
-- **Backup**: Zkopírovat `resto_data.db`
+  - monthly_department_kpi_data
+  - department_monthly_summary
 
 ### Python Balíky
 - `streamlit` - Web framework
 - `pandas` - Data processing
 - `plotly` - Grafy
+- `psycopg2-binary` - PostgreSQL driver (NOVÉ)
+- `sqlalchemy` - Database toolkit (NOVÉ)
 
 ### Port
 - **Default**: 8501
@@ -357,7 +399,13 @@ A: Editovat `.streamlit/secrets.toml` nebo nastavit v Streamlit Cloud Secrets.
 A: Zkopírovat soubor `resto_data.db`.
 
 **Q: Mohu spustit na webu?**
-A: Ano, na Streamlit Cloud nebo vlastním serveru.
+A: Ano! Postupujte podle **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** pro cloud deployment.
+
+**Q: Jak migruji z lokální SQLite na cloud PostgreSQL?**
+A: Spusťte `python migrate_sqlite_to_postgres.py` - viz **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**.
+
+**Q: Je Supabase databáze zdarma?**
+A: Ano! Free tier nabízí 500MB PostgreSQL databáze zdarma, což je dostatečné pro RESTO aplikaci.
 
 ---
 
@@ -378,6 +426,10 @@ A: Ano, na Streamlit Cloud nebo vlastním serveru.
 - ✅ Porovnání měsíců
 - ✅ Binary ID fixes
 - ✅ Marketing KPI placeholder
+- ✅ **PostgreSQL podpora** - Supabase cloud databáze
+- ✅ **Perzistentní data** - Data přetrvávají v cloudu
+- ✅ **Migrační skript** - Automatický přenos dat SQLite → PostgreSQL
+- ✅ **Cloud deployment ready** - Připraveno pro Streamlit Cloud
 
 ### Změny v 3.0
 - ✅ Kompletní redesign UI

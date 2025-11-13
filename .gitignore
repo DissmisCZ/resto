@@ -60,6 +60,8 @@ docker-compose.yml
 # Documentation (keep local, don't upload)
 *.md
 !README.md
+!SUPABASE_SETUP.md
+!ZMENA_HESLA.md
 *.txt
 !requirements.txt
 

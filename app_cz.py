@@ -10,7 +10,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-import database as db
+import database_postgres as db
 import io
 
 st.set_page_config(page_title="RESTO v3", page_icon="🍽️", layout="wide", initial_sidebar_state="expanded")
