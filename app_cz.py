@@ -21,6 +21,8 @@ st.set_page_config(page_title="RESTO v3", page_icon="🍽️", layout="wide", in
 # ============================================================================
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
+if 'data_loaded' not in st.session_state:
+    st.session_state.data_loaded = False
 
 if not st.session_state.authenticated:
     st.markdown("""
@@ -33,69 +35,81 @@ if not st.session_state.authenticated:
     [data-testid="stAppViewContainer"], [data-testid="stApp"], html, body {
         background-color: #ffffff !important;
     }
-    /* Center login page */
-    .block-container {
+    /* Center login page - fixed overlapping */
+    .main .block-container {
         display: flex !important;
+        flex-direction: column !important;
         justify-content: center !important;
         align-items: center !important;
         min-height: 100vh !important;
-        padding-top: 0 !important;
-        max-width: 400px !important;
+        padding: 2rem 1rem !important;
+        max-width: 420px !important;
         margin: 0 auto !important;
     }
-    /* Centered content */
+    /* Prevent overlapping */
     .element-container {
         width: 100% !important;
         max-width: 400px !important;
-        margin: 0 auto !important;
+        margin: 0 auto 1rem auto !important;
+        z-index: 1;
     }
     .stImage {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
-        margin: 0 auto 25px auto !important;
+        margin: 0 auto 1.5rem auto !important;
     }
     .stImage > img {
         margin: 0 auto !important;
         display: block !important;
     }
-    /* Aligned input */
+    /* Input styling */
     .stTextInput {
         width: 100% !important;
         max-width: 400px !important;
-        margin: 0 auto !important;
+        margin: 1rem auto !important;
     }
     .stTextInput > div > div > input {
-        border-radius: 10px;
-        border: 2px solid #d1d5db;
-        padding: 14px 16px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        padding: 16px 18px;
         font-size: 16px;
         width: 100%;
         box-sizing: border-box;
+        transition: all 0.2s;
     }
     .stTextInput > div > div > input:focus {
-        border-color: #0891b2;
-        box-shadow: 0 0 0 3px rgba(8,145,178,0.1);
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99,102,241,0.1);
+        outline: none;
     }
-    /* Aligned button */
+    /* Button styling */
     .stButton {
         width: 100% !important;
         max-width: 400px !important;
-        margin: 0 auto !important;
+        margin: 1rem auto !important;
     }
     .stButton > button {
-        border-radius: 10px;
-        padding: 14px 30px;
-        font-size: 16px;
+        border-radius: 12px;
+        padding: 16px 32px;
+        font-size: 17px;
         font-weight: 600;
-        margin-top: 15px;
         width: 100% !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        transition: all 0.3s;
     }
-    /* Warning alignment */
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    /* Alert styling */
     .stAlert {
         max-width: 400px !important;
-        margin: 15px auto !important;
+        margin: 1rem auto !important;
+        border-radius: 12px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -124,6 +138,7 @@ if not st.session_state.authenticated:
     if st.button("🔓 Přihlásit se", type="primary"):
         if password == correct_password:
             st.session_state.authenticated = True
+            st.session_state.data_loaded = False  # Force data loading
             st.success("✅ Přihlášení úspěšné!")
             st.rerun()
         else:
@@ -133,6 +148,86 @@ if not st.session_state.authenticated:
     if correct_password == "resto2025":
         st.markdown('<p style="text-align: center; margin-top: 25px; color: #9ca3af; font-size: 14px;">💡 Demo heslo: resto2025</p>', unsafe_allow_html=True)
 
+    st.stop()
+
+# ============================================================================
+# LOADING SCREEN - Pre-load data after login
+# ============================================================================
+if not st.session_state.get('data_loaded', False):
+    st.markdown("""
+    <style>
+    /* Loading screen styling */
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        text-align: center;
+    }
+    .loading-spinner {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #667eea;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 2rem auto;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="loading-container">', unsafe_allow_html=True)
+    st.markdown('<div class="loading-spinner"></div>', unsafe_allow_html=True)
+    st.markdown("### 🔄 Načítání dat...")
+    st.markdown("Připravujeme dashboard, prosím počkejte...")
+
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+
+    # Pre-load all data into cache
+    import time
+    try:
+        status_text.text("📁 Načítání oddělení...")
+        progress_bar.progress(10)
+        db.get_departments()
+
+        status_text.text("📍 Načítání lokalit...")
+        progress_bar.progress(25)
+        db.get_locations()
+
+        status_text.text("👥 Načítání provozních...")
+        progress_bar.progress(40)
+        db.get_operational_managers()
+
+        status_text.text("📊 Načítání KPI definic...")
+        progress_bar.progress(55)
+        db.get_kpi_definitions()
+
+        status_text.text("📈 Načítání KPI hranic...")
+        progress_bar.progress(70)
+        db.get_kpi_thresholds()
+
+        status_text.text("💾 Načítání měsíčních dat...")
+        progress_bar.progress(85)
+        db.get_all_months_with_data()
+
+        status_text.text("✅ Dokončování...")
+        progress_bar.progress(100)
+        time.sleep(0.5)
+
+        st.session_state.data_loaded = True
+        st.rerun()
+
+    except Exception as e:
+        st.error(f"❌ Chyba při načítání dat: {str(e)}")
+        st.stop()
+
+    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # ============================================================================
@@ -900,7 +995,7 @@ with st.sidebar:
     st.markdown("---")
     if st.button("🔄 Obnovit data", use_container_width=True, help="Vyčistí cache a načte nejnovější data z databáze"):
         st.cache_data.clear()
-        st.success("Cache vymazána!")
+        st.session_state.data_loaded = False
         st.rerun()
 
     # Logout and theme buttons

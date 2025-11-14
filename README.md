@@ -49,34 +49,49 @@ RESTO v3.1 je **kompletně nezávislá** aplikace pro správu operačních KPI r
 - ✅ **Automatická migrace** - Přenos dat z lokální SQLite jedním příkazem
 - ✅ **Streamlit Cloud ready** - Nasaďte aplikaci za 5 minut
 - ✅ **Denní zálohy** - Supabase automaticky zálohuje data
+- ✅ **Agresivní caching** - Data se cachují na 1 hodinu pro rychlý přístup
+- ✅ **Loading screen** - Elegantní načítání dat při přihlášení
+- ✅ **Optimalizace pro free tier** - Rychlé přepínání mezi taby
 
 ### Klíčové rysy:
-- ✅ **Autentizace** - zabezpečené přihlášení
-- ✅ **Light/Dark Mode** - přepínání barevných režimů
-- ✅ **Moderní UI** - gradient nadpisy, karty s animacemi
-- ✅ **Logo Bouda Burgers** - branding na login i v sidebaru
-- ✅ **Měsíční KPI tracking**
+- ✅ **Autentizace** - Vylepšený moderní login s gradient tlačítkem
+- ✅ **Smart caching** - Rychlá navigace bez opakovaného načítání
+- ✅ **Light/Dark Mode** - Přepínání barevných režimů
+- ✅ **Moderní UI** - Gradient nadpisy, karty s animacemi, žádné překrývání
+- ✅ **Logo Bouda Burgers** - Branding na login i v sidebaru
+- ✅ **Měsíční KPI tracking** - Kompletní sledování výkonnosti
 - ✅ **Oddělení** (Matějovo, Thomasovo, Michaelovo)
 - ✅ **Lokality** (Mercury, OC4Dvory, Bouda, Bistro)
 - ✅ **Provozní manažeři** s přiřazením KPI
 - ✅ **Dynamické KPI hranice** s bonusovým systémem
-- ✅ **Porovnání měsíců** - trend analýza
-- ✅ **Kompaktní sidebar** - vejde se na jeden screen
+- ✅ **Porovnání měsíců** - Trend analýza
+- ✅ **Kompaktní sidebar** - Vejde se na jeden screen
 - ✅ **Import/Export** CSV data
-- ✅ **Marketing KPI** placeholder
+- ✅ **🔄 Obnovit data** - Manuální refresh cache tlačítko
 
 ---
 
 ## Nové ve v3.1
 
-### 🔐 Autentizace
-- Zabezpečené přihlášení s heslem
+### 🔐 Vylepšená Autentizace & UX
+- **Modernizovaný login** - Gradient tlačítko, lepší styling, bez překrývání
+- **Loading screen** - Elegantní načítání dat po přihlášení s progress barem
+- **Smart caching** - Data se cachují na 1 hodinu (rychlé přepínání mezi taby)
+- **🔄 Obnovit data** - Tlačítko pro manuální refresh cache
 - Konfigurace hesla přes `.streamlit/secrets.toml`
 - Session management
 
+### ⚡ Performance Optimalizace
+- **Agresivní caching** - Základní data (oddělení, lokality, KPI) cache 1h
+- **Pre-loading** - Všechna data se načtou najednou při přihlášení
+- **Rychlá navigace** - Přepínání mezi taby je instantní (data v cache)
+- **Free tier friendly** - Optimalizováno pro Supabase free tier
+- Cachování měsíčních dat na 30 minut
+
 ### 🎨 Moderní Design
-- **Light/Dark Mode** - přepínací tlačítka ☀️ | 🌙
-- Gradient nadpisy (purple/violet)
+- **Light/Dark Mode** - Přepínací tlačítka ☀️ | 🌙
+- **Gradient tlačítka** - Moderní hover efekty
+- **Opravený layout** - Žádné překrývající se elementy
 - Karty s hover efekty a animacemi
 - Shadows a smooth transitions
 - Bílé pozadí (light) / Tmavé pozadí (dark)
@@ -436,10 +451,17 @@ A: Ano! Free tier nabízí 500MB PostgreSQL databáze zdarma, což je dostatečn
 ## 📝 Verze
 
 **Aktuální**: 3.1
-**Poslední aktualizace**: 2025-11-13
-**Status**: ✅ Production Ready
+**Poslední aktualizace**: 2025-01-14
+**Status**: ✅ Production Ready + Performance Optimized
 
 ### Změny v 3.1
+- ✅ **Vylepšený login** - Gradient tlačítko, žádné překrývání elementů
+- ✅ **Loading screen** - Elegantní načítání dat po přihlášení s progress barem
+- ✅ **Agresivní caching** - Data cache 1 hodina pro rychlé přepínání mezi taby
+- ✅ **🔄 Obnovit data** - Manuální refresh cache tlačítko v sidebaru
+- ✅ **PostgreSQL optimalizace** - Všechny query opraveny pro RealDictCursor
+- ✅ **BOOLEAN syntax** - Opraveno aktivni = TRUE místo = 1
+- ✅ **Free tier friendly** - Optimalizováno pro Supabase free tier
 - ✅ Autentizace s heslem
 - ✅ Light/Dark Mode přepínač
 - ✅ Moderní UI design (karty, animace, shadows)
@@ -448,7 +470,6 @@ A: Ano! Free tier nabízí 500MB PostgreSQL databáze zdarma, což je dostatečn
 - ✅ Přiřazení KPI k manažerům
 - ✅ Dynamické KPI hranice
 - ✅ Porovnání měsíců
-- ✅ Binary ID fixes
 - ✅ Marketing KPI placeholder
 - ✅ **PostgreSQL podpora** - Supabase cloud databáze
 - ✅ **Perzistentní data** - Data přetrvávají v cloudu
@@ -475,4 +496,4 @@ Interní projekt Bouda Burgers. Všechna práva vyhrazena.
 
 ---
 
-**Poslední úprava**: 2025-11-13
+**Poslední úprava**: 2025-01-14
