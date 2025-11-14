@@ -22,16 +22,37 @@ def safe_convert_id(value):
     """Safely convert any ID value to Python int (handles numpy, pandas types)"""
     if value is None:
         return None
+
+    # Handle string representations
+    if isinstance(value, str):
+        try:
+            return int(float(value))
+        except (ValueError, TypeError):
+            pass
+
+    # Handle numeric types
     if isinstance(value, (int, np.integer)):
         return int(value)
     if isinstance(value, (float, np.floating)):
         return int(value)
     if isinstance(value, bytes):
         return int.from_bytes(value, byteorder='little')
+
+    # Handle pandas/numpy scalar types
+    if hasattr(value, 'item'):
+        try:
+            return int(value.item())
+        except (ValueError, TypeError, AttributeError):
+            pass
+
+    # Last resort: try direct conversion
     try:
-        return int(value)
-    except (ValueError, TypeError):
-        raise ValueError(f"Cannot convert {type(value).__name__} to int: {value}")
+        # Handle any other numeric-like types
+        converted = float(value)
+        return int(converted)
+    except (ValueError, TypeError) as e:
+        # Better error message with type info
+        raise ValueError(f"Cannot convert {type(value).__name__} (module: {type(value).__module__}) value '{value}' to int. Error: {e}")
 
 def get_connection():
     """Get PostgreSQL database connection from Streamlit secrets"""
