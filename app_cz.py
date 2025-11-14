@@ -156,18 +156,62 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ============================================================================
+# CACHED HELPER FUNCTIONS - Must be defined before loading screen
+# ============================================================================
+@st.cache_data(ttl=3600)  # 1 hour cache
+def get_managers():
+    return db.get_operational_managers()
+
+@st.cache_data(ttl=3600)  # 1 hour cache
+def get_locs():
+    return db.get_locations()
+
+@st.cache_data(ttl=3600)  # 1 hour cache
+def get_kpis():
+    return db.get_kpi_definitions()
+
+@st.cache_data(ttl=3600)  # 1 hour cache
+def get_depts():
+    return db.get_departments()
+
+@st.cache_resource
+def init_db_once():
+    """Initialize database tables - runs only once per session"""
+    db.init_database()
+    db.insert_default_data()
+    return True
+
+# Initialize database
+init_db_once()
+
+# ============================================================================
 # LOADING SCREEN - Pre-load data after login
 # ============================================================================
 if not st.session_state.get('data_loaded', False):
     st.markdown("""
     <style>
+    /* Hide sidebar during loading */
+    [data-testid="stSidebar"] {
+        display: none !important;
+    }
+    /* Full screen loading container */
+    .main .block-container {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        min-height: 100vh !important;
+        padding: 2rem !important;
+        max-width: 600px !important;
+        margin: 0 auto !important;
+    }
     /* Loading screen styling */
     .loading-container {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        min-height: 100vh;
+        width: 100%;
         text-align: center;
     }
     .loading-spinner {
@@ -840,34 +884,6 @@ input, textarea, [data-baseweb="input"] {
 }
 </style>
 """, unsafe_allow_html=True)
-
-# Cached helper functions - defined before loading screen
-@st.cache_data(ttl=3600)  # 1 hour cache - matches database cache
-def get_managers():
-    return db.get_operational_managers()
-
-@st.cache_data(ttl=3600)  # 1 hour cache - matches database cache
-def get_locs():
-    return db.get_locations()
-
-@st.cache_data(ttl=3600)  # 1 hour cache - matches database cache
-def get_kpis():
-    return db.get_kpi_definitions()
-
-@st.cache_data(ttl=3600)
-def get_depts():
-    return db.get_departments()
-
-# Init DB only once (cached)
-@st.cache_resource
-def init_db_once():
-    """Initialize database tables - runs only once per session"""
-    db.init_database()
-    db.insert_default_data()
-    return True
-
-# Call init
-init_db_once()
 
 def format_month(m):
     """Convert YYYY-MM to Czech month name"""
