@@ -402,6 +402,16 @@ hr {
 [data-testid="stSidebar"] .stButton > button {
     padding: 10px 14px !important;
     font-size: 14px !important;
+    background-color: #30363d !important;
+    color: #fafafa !important;
+    border: 1px solid #40464d !important;
+    font-weight: 500 !important;
+}
+
+[data-testid="stSidebar"] .stButton > button:hover {
+    background-color: #40464d !important;
+    border-color: #50565d !important;
+    color: #ffffff !important;
 }
 
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
@@ -455,6 +465,50 @@ input, textarea, [data-baseweb="input"] {
     border-color: #30363d !important;
 }
 
+input:focus, textarea:focus, [data-baseweb="input"]:focus {
+    border-color: #0e7490 !important;
+    background-color: #30363d !important;
+}
+
+/* Number input */
+input[type="number"] {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+}
+
+/* Text input */
+.stTextInput input {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+    border: 1px solid #40464d !important;
+}
+
+.stTextInput input:focus {
+    border-color: #0e7490 !important;
+    box-shadow: 0 0 0 1px #0e7490 !important;
+}
+
+/* Number input */
+.stNumberInput input {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+    border: 1px solid #40464d !important;
+}
+
+/* Text area */
+.stTextArea textarea {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+    border: 1px solid #40464d !important;
+}
+
+/* Date input */
+.stDateInput input {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+    border: 1px solid #40464d !important;
+}
+
 /* Selectbox */
 [data-baseweb="select"] {
     background-color: #262730 !important;
@@ -472,6 +526,43 @@ input, textarea, [data-baseweb="input"] {
 [data-baseweb="select"] > div {
     background-color: #262730 !important;
     color: #fafafa !important;
+}
+
+/* Dropdown menu (when selectbox is opened) */
+[data-baseweb="popover"] {
+    background-color: #262730 !important;
+    border: 1px solid #40464d !important;
+}
+
+[role="listbox"] {
+    background-color: #262730 !important;
+    border: 1px solid #40464d !important;
+}
+
+[role="option"] {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+}
+
+[role="option"]:hover {
+    background-color: #30363d !important;
+    color: #ffffff !important;
+}
+
+[role="option"][aria-selected="true"] {
+    background-color: #0e7490 !important;
+    color: #ffffff !important;
+}
+
+/* Dropdown list items */
+ul[role="listbox"] li {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+}
+
+ul[role="listbox"] li:hover {
+    background-color: #30363d !important;
+    color: #ffffff !important;
 }
 
 /* Radio buttons */
