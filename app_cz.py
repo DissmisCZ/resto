@@ -431,31 +431,49 @@ h1, h2, h3, h4, h5, h6, p, span, div, label {
     color: #fafafa !important;
 }
 
-/* Buttons */
-.stButton > button {
+/* Buttons - ALL buttons everywhere */
+.stButton > button,
+.stButton button,
+button[kind="secondary"],
+button[kind="primary"] {
     background-color: #262730 !important;
     color: #fafafa !important;
-    border: 1px solid #30363d !important;
+    border: 1px solid #40464d !important;
+    font-weight: 500 !important;
 }
 
-.stButton > button:hover {
+.stButton > button:hover,
+.stButton button:hover,
+button:hover {
     background-color: #30363d !important;
-    border-color: #40464d !important;
+    border-color: #50565d !important;
+    color: #ffffff !important;
 }
 
-.stButton > button[kind="primary"] {
+.stButton > button[kind="primary"],
+.stButton button[kind="primary"],
+button[kind="primary"] {
     background-color: #0e7490 !important;
     color: white !important;
     border: none !important;
 }
 
-.stButton > button[kind="primary"]:hover {
+.stButton > button[kind="primary"]:hover,
+.stButton button[kind="primary"]:hover,
+button[kind="primary"]:hover {
     background-color: #0891b2 !important;
 }
 
-.stButton > button[kind="secondary"] {
+.stButton > button[kind="secondary"],
+.stButton button[kind="secondary"],
+button[kind="secondary"] {
     background-color: #262730 !important;
     color: #fafafa !important;
+    border: 1px solid #40464d !important;
+}
+
+button[kind="secondary"]:hover {
+    background-color: #30363d !important;
 }
 
 /* Input fields */
@@ -565,13 +583,84 @@ ul[role="listbox"] li:hover {
     color: #ffffff !important;
 }
 
+/* ALL Labels - make sure everything is readable */
+label, .stSelectbox label, .stTextInput label, .stNumberInput label,
+.stTextArea label, .stDateInput label, .stTimeInput label,
+.stFileUploader label, .stSlider label, .stMultiSelect label {
+    color: #fafafa !important;
+    font-weight: 500 !important;
+}
+
+/* Placeholder text */
+::placeholder,
+input::placeholder,
+textarea::placeholder {
+    color: #808080 !important;
+    opacity: 0.7 !important;
+}
+
 /* Radio buttons */
 [data-testid="stRadio"] label {
     color: #fafafa !important;
 }
 
+[data-testid="stRadio"] > div {
+    color: #fafafa !important;
+}
+
 /* Checkboxes */
 [data-testid="stCheckbox"] label {
+    color: #fafafa !important;
+}
+
+[data-testid="stCheckbox"] span {
+    color: #fafafa !important;
+}
+
+/* File Uploader */
+[data-testid="stFileUploader"] {
+    background-color: #262730 !important;
+    border: 2px dashed #40464d !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+}
+
+[data-testid="stFileUploader"] label {
+    color: #fafafa !important;
+}
+
+[data-testid="stFileUploader"] button {
+    background-color: #30363d !important;
+    color: #fafafa !important;
+    border: 1px solid #40464d !important;
+}
+
+[data-testid="stFileUploader"] section {
+    background-color: #262730 !important;
+    border-color: #40464d !important;
+}
+
+[data-testid="stFileUploader"] small {
+    color: #a0a0a0 !important;
+}
+
+/* Multiselect */
+.stMultiSelect [data-baseweb="tag"] {
+    background-color: #0e7490 !important;
+    color: white !important;
+}
+
+.stMultiSelect [data-baseweb="input"] {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+}
+
+/* Slider */
+.stSlider [data-baseweb="slider"] {
+    background-color: #30363d !important;
+}
+
+.stSlider [data-testid="stTickBar"] div {
     color: #fafafa !important;
 }
 
@@ -673,6 +762,71 @@ ul[role="listbox"] li:hover {
 
 [data-testid="stNotification"] {
     border-radius: 10px !important;
+}
+
+/* Progress bar */
+.stProgress > div > div {
+    background-color: #0e7490 !important;
+}
+
+.stProgress > div {
+    background-color: #30363d !important;
+}
+
+/* Spinner */
+.stSpinner > div {
+    border-color: #0e7490 !important;
+}
+
+/* Download button */
+.stDownloadButton > button {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+    border: 1px solid #40464d !important;
+}
+
+.stDownloadButton > button:hover {
+    background-color: #30363d !important;
+}
+
+/* Caption text */
+.stCaption, [data-testid="stCaption"] {
+    color: #a0a0a0 !important;
+}
+
+/* Code blocks */
+code {
+    background-color: #262730 !important;
+    color: #f8f8f2 !important;
+    padding: 0.2em 0.4em !important;
+    border-radius: 3px !important;
+}
+
+pre {
+    background-color: #262730 !important;
+    border: 1px solid #40464d !important;
+    color: #f8f8f2 !important;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    background-color: transparent !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+    color: #a0a0a0 !important;
+    border-bottom: 2px solid transparent !important;
+}
+
+.stTabs [aria-selected="true"] {
+    color: #fafafa !important;
+    border-bottom-color: #0e7490 !important;
+}
+
+/* Info/Warning/Error/Success messages */
+.stAlert[data-baseweb="notification"] {
+    background-color: #262730 !important;
+    color: #fafafa !important;
 }
 </style>
 """, unsafe_allow_html=True)
