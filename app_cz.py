@@ -114,13 +114,16 @@ if not st.session_state.authenticated:
     </style>
     """, unsafe_allow_html=True)
 
-    # Logo - perfectly centered
+    # Logo - perfectly centered using HTML
     try:
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            st.markdown('<div style="display: flex; justify-content: center; width: 100%;">', unsafe_allow_html=True)
-            st.image("assets/logo.png", width=180)
-            st.markdown('</div>', unsafe_allow_html=True)
+        import base64
+        with open("assets/logo.png", "rb") as f:
+            logo_data = base64.b64encode(f.read()).decode()
+        st.markdown(f'''
+        <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 2rem;">
+            <img src="data:image/png;base64,{logo_data}" width="180" style="display: block; margin: 0 auto;">
+        </div>
+        ''', unsafe_allow_html=True)
     except:
         st.markdown('<div style="text-align: center; font-size: 80px; margin-bottom: 20px;">🍔</div>', unsafe_allow_html=True)
 
