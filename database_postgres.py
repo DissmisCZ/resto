@@ -363,7 +363,7 @@ def insert_default_data():
 
 # ============ DEPARTMENTS FUNCTIONS ============
 
-@st.cache_data(ttl=300)  # Cache for 5 minutes
+@st.cache_data(ttl=3600)  # Cache for 1 hour (free tier is slow)
 def get_departments():
     """Get all active departments"""
     conn = get_connection()
@@ -403,7 +403,7 @@ def add_department(nazev, vedouci=None, popis=None):
 
 # ============ LOCATIONS FUNCTIONS ============
 
-@st.cache_data(ttl=300)  # Cache for 5 minutes
+@st.cache_data(ttl=3600)  # Cache for 1 hour (free tier is slow)
 def get_locations():
     """Get all active locations with department info"""
     conn = get_connection()
@@ -426,6 +426,7 @@ def get_locations():
         df = pd.DataFrame(columns=['id', 'nazev', 'department_id', 'department', 'popis', 'aktivni'])
     return df
 
+@st.cache_data(ttl=3600)  # Cache for 1 hour (free tier is slow)
 def get_locations_by_department(department_id):
     """Get all locations in a department"""
     department_id = safe_convert_id(department_id)
@@ -489,7 +490,7 @@ def update_location_department(location_id, department_id):
 
 # ============ OPERATIONAL MANAGERS FUNCTIONS ============
 
-@st.cache_data(ttl=300)  # Cache for 5 minutes
+@st.cache_data(ttl=3600)  # Cache for 1 hour (free tier is slow)
 def get_operational_managers():
     """Get all active operational managers"""
     conn = get_connection()
@@ -603,7 +604,7 @@ def set_manager_kpis(manager_id, kpi_ids):
 
 # ============ KPI DEFINITIONS & THRESHOLDS ============
 
-@st.cache_data(ttl=300)  # Cache for 5 minutes
+@st.cache_data(ttl=3600)  # Cache for 1 hour (free tier is slow)
 def get_kpi_definitions():
     """Get all active KPI definitions"""
     conn = get_connection()
@@ -739,6 +740,7 @@ def add_monthly_kpi_data(mesic, location_id, kpi_id, hodnota, poznamka=None, zdr
         conn.close()
         return False, f"Chyba: {str(e)}"
 
+@st.cache_data(ttl=1800)  # Cache for 30 minutes (data changes more often)
 def get_monthly_kpi_data(mesic=None, location_id=None, kpi_id=None):
     """Get monthly KPI data with filters"""
     location_id = safe_convert_id(location_id)
@@ -876,6 +878,7 @@ def calculate_monthly_kpi_evaluation(mesic, location_id=None):
     cursor.close()
     conn.close()
 
+@st.cache_data(ttl=1800)  # Cache for 30 minutes (this changes more often)
 def get_monthly_kpi_evaluation(mesic, location_id=None):
     """Get KPI evaluation for a month"""
     location_id = safe_convert_id(location_id)

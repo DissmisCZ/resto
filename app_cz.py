@@ -896,8 +896,14 @@ with st.sidebar:
     else:
         comparison_month = None
 
-    # Logout and theme buttons
+    # Refresh cache button
     st.markdown("---")
+    if st.button("🔄 Obnovit data", use_container_width=True, help="Vyčistí cache a načte nejnovější data z databáze"):
+        st.cache_data.clear()
+        st.success("Cache vymazána!")
+        st.rerun()
+
+    # Logout and theme buttons
     if st.button("🚪 Odhlásit", use_container_width=True):
         st.session_state.authenticated = False
         st.rerun()
