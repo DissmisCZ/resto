@@ -6,6 +6,7 @@ Showing PROVOZNÍ (operational managers) results, not departments
 
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, date
@@ -766,18 +767,38 @@ def month_to_string(dt):
     return dt.strftime("%Y-%m")
 
 def safe_int_id(value):
-    """Safely convert ID to integer (handles bytes from pandas and various DB types)"""
+    """Safely convert any ID value to Python int (handles numpy, pandas types)"""
     if value is None:
-        raise ValueError("Cannot convert None to int")
+        return None
+
+    # Handle string representations
+    if isinstance(value, str):
+        try:
+            return int(float(value))
+        except (ValueError, TypeError):
+            pass
+
+    # Handle numeric types
+    if isinstance(value, (int, np.integer)):
+        return int(value)
+    if isinstance(value, (float, np.floating)):
+        return int(value)
     if isinstance(value, bytes):
         return int.from_bytes(value, byteorder='little')
-    if isinstance(value, (int, float)):
-        return int(value)
-    # Handle numpy types and other numeric types
+
+    # Handle pandas/numpy scalar types
+    if hasattr(value, 'item'):
+        try:
+            return int(value.item())
+        except (ValueError, TypeError, AttributeError):
+            pass
+
+    # Last resort: try direct conversion
     try:
-        return int(float(value))
+        converted = float(value)
+        return int(converted)
     except (ValueError, TypeError) as e:
-        raise ValueError(f"Cannot convert {type(value).__name__} value '{value}' to int: {e}")
+        raise ValueError(f"Cannot convert {type(value).__name__} (module: {type(value).__module__}) value '{value}' to int. Error: {e}")
 
 # Initialize session state for persistent messages
 if 'save_message' not in st.session_state:
