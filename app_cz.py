@@ -2122,21 +2122,21 @@ elif page == "⚙️ Admin":
 
         with col1:
             st.markdown("#### 📁 Základní tabulky")
-            cursor.execute("SELECT COUNT(*) FROM departments WHERE aktivni = 1")
+            cursor.execute("SELECT COUNT(*) FROM departments WHERE aktivni = TRUE")
             dept_count = cursor.fetchone()[0]
             st.metric("Oddělení", dept_count)
 
-            cursor.execute("SELECT COUNT(*) FROM locations WHERE aktivni = 1")
+            cursor.execute("SELECT COUNT(*) FROM locations WHERE aktivni = TRUE")
             loc_count = cursor.fetchone()[0]
             st.metric("Lokality", loc_count)
 
-            cursor.execute("SELECT COUNT(*) FROM operational_managers WHERE aktivni = 1")
+            cursor.execute("SELECT COUNT(*) FROM operational_managers WHERE aktivni = TRUE")
             mgr_count = cursor.fetchone()[0]
             st.metric("Provozní", mgr_count)
 
         with col2:
             st.markdown("#### 📊 KPI")
-            cursor.execute("SELECT COUNT(*) FROM kpi_definitions WHERE aktivni = 1")
+            cursor.execute("SELECT COUNT(*) FROM kpi_definitions WHERE aktivni = TRUE")
             kpi_count = cursor.fetchone()[0]
             st.metric("KPI Definice", kpi_count)
 
@@ -2166,7 +2166,7 @@ elif page == "⚙️ Admin":
 
         # Show sample data
         st.markdown("**Oddělení:**")
-        cursor.execute("SELECT nazev, vedouci, ma_vlastni_kpi FROM departments WHERE aktivni = 1 LIMIT 5")
+        cursor.execute("SELECT nazev, vedouci, ma_vlastni_kpi FROM departments WHERE aktivni = TRUE LIMIT 5")
         depts_data = cursor.fetchall()
         if depts_data:
             st.write(pd.DataFrame(depts_data, columns=['Název', 'Vedoucí', 'Vlastní KPI']))
@@ -2178,7 +2178,7 @@ elif page == "⚙️ Admin":
             SELECT l.nazev, d.nazev as oddeleni
             FROM locations l
             JOIN departments d ON l.department_id = d.id
-            WHERE l.aktivni = 1
+            WHERE l.aktivni = TRUE
             LIMIT 5
         """)
         locs_data = cursor.fetchall()
@@ -2188,7 +2188,7 @@ elif page == "⚙️ Admin":
             st.warning("⚠️ Žádné lokality!")
 
         st.markdown("**KPI Definice:**")
-        cursor.execute("SELECT nazev, jednotka, typ_vypoctu FROM kpi_definitions WHERE aktivni = 1 LIMIT 5")
+        cursor.execute("SELECT nazev, jednotka, typ_vypoctu FROM kpi_definitions WHERE aktivni = TRUE LIMIT 5")
         kpis_data = cursor.fetchall()
         if kpis_data:
             st.write(pd.DataFrame(kpis_data, columns=['Název', 'Jednotka', 'Typ']))
@@ -2238,8 +2238,8 @@ elif page == "⚙️ Admin":
         cursor.execute("""
             SELECT m.id, m.mesic, l.nazev as lokalita, k.nazev as kpi, m.hodnota
             FROM monthly_kpi_data m
-            JOIN locations l ON m.location_id = l.id AND l.aktivni = 1
-            JOIN kpi_definitions k ON m.kpi_id = k.id AND k.aktivni = 1
+            JOIN locations l ON m.location_id = l.id AND l.aktivni = TRUE
+            JOIN kpi_definitions k ON m.kpi_id = k.id AND k.aktivni = TRUE
             WHERE m.status = 'ACTIVE'
             ORDER BY m.created_at DESC
             LIMIT 10
