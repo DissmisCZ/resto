@@ -115,12 +115,14 @@ if not st.session_state.authenticated:
     """, unsafe_allow_html=True)
 
     # Logo - perfectly centered
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col2:
-        try:
+    try:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.markdown('<div style="display: flex; justify-content: center; width: 100%;">', unsafe_allow_html=True)
             st.image("assets/logo.png", width=180)
-        except:
-            st.markdown('<div style="text-align: center; font-size: 80px; margin-bottom: 20px;">🍔</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+    except:
+        st.markdown('<div style="text-align: center; font-size: 80px; margin-bottom: 20px;">🍔</div>', unsafe_allow_html=True)
 
     # Title - centered
     st.markdown('<h2 style="text-align: center; color: #1a1a1a; margin: 10px 0 5px 0; font-size: 32px; font-weight: bold;">Bouda Burgers</h2>', unsafe_allow_html=True)
@@ -189,36 +191,41 @@ if not st.session_state.get('data_loaded', False):
     progress_bar = st.progress(0)
     status_text = st.empty()
 
-    # Pre-load all data into cache
+    # Pre-load all data into cache (both database and app level)
     import time
     try:
+        # Load database-level cached data
         status_text.text("📁 Načítání oddělení...")
         progress_bar.progress(10)
-        db.get_departments()
+        get_depts()  # Use app-level cache wrapper
 
         status_text.text("📍 Načítání lokalit...")
-        progress_bar.progress(25)
-        db.get_locations()
+        progress_bar.progress(22)
+        get_locs()  # Use app-level cache wrapper
 
         status_text.text("👥 Načítání provozních...")
-        progress_bar.progress(40)
-        db.get_operational_managers()
+        progress_bar.progress(34)
+        get_managers()  # Use app-level cache wrapper
 
         status_text.text("📊 Načítání KPI definic...")
-        progress_bar.progress(55)
-        db.get_kpi_definitions()
+        progress_bar.progress(46)
+        get_kpis()  # Use app-level cache wrapper
 
         status_text.text("📈 Načítání KPI hranic...")
-        progress_bar.progress(70)
+        progress_bar.progress(58)
         db.get_kpi_thresholds()
 
         status_text.text("💾 Načítání měsíčních dat...")
-        progress_bar.progress(85)
+        progress_bar.progress(70)
         db.get_all_months_with_data()
 
-        status_text.text("✅ Dokončování...")
+        status_text.text("🔄 Příprava rozhraní...")
+        progress_bar.progress(85)
+        time.sleep(0.2)
+
+        status_text.text("✅ Dokončeno!")
         progress_bar.progress(100)
-        time.sleep(0.5)
+        time.sleep(0.4)
 
         st.session_state.data_loaded = True
         st.rerun()
@@ -831,21 +838,33 @@ input, textarea, [data-baseweb="input"] {
 </style>
 """, unsafe_allow_html=True)
 
-# Init DB
-db.init_database()
-db.insert_default_data()
-
-@st.cache_data(ttl=60)
+# Cached helper functions - defined before loading screen
+@st.cache_data(ttl=3600)  # 1 hour cache - matches database cache
 def get_managers():
     return db.get_operational_managers()
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=3600)  # 1 hour cache - matches database cache
 def get_locs():
     return db.get_locations()
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=3600)  # 1 hour cache - matches database cache
 def get_kpis():
     return db.get_kpi_definitions()
+
+@st.cache_data(ttl=3600)
+def get_depts():
+    return db.get_departments()
+
+# Init DB only once (cached)
+@st.cache_resource
+def init_db_once():
+    """Initialize database tables - runs only once per session"""
+    db.init_database()
+    db.insert_default_data()
+    return True
+
+# Call init
+init_db_once()
 
 def format_month(m):
     """Convert YYYY-MM to Czech month name"""
@@ -1832,7 +1851,7 @@ elif page == "⚙️ Admin":
         with col1:
             new_loc_name = st.text_input("Název lokality:", key="new_loc_name")
         with col2:
-            depts = db.get_departments()
+            depts = get_depts()  # Use cached version
             new_loc_dept = st.selectbox("Oddělení:", depts['nazev'].tolist(), key="add_loc_dept")
             dept_id = safe_int_id(depts[depts['nazev'] == new_loc_dept]['id'].iloc[0])
         with col3:
@@ -1891,7 +1910,7 @@ elif page == "⚙️ Admin":
         with col1:
             new_mgr_name = st.text_input("Jméno provozního:", key="new_mgr_name")
         with col2:
-            depts = db.get_departments()
+            depts = get_depts()  # Use cached version
             new_mgr_dept = st.selectbox("Oddělení:", depts['nazev'].tolist(), key="add_mgr_dept")
             dept_id = safe_int_id(depts[depts['nazev'] == new_mgr_dept]['id'].iloc[0])
         with col3:
