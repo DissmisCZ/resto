@@ -942,19 +942,9 @@ if page == "📊 Přehled":
         for _, manager in managers.iterrows():
             st.markdown(f"### 👤 {manager['jmeno']} ({manager['department']})")
 
-            # DEBUG: Show type info
-            dept_id_val = manager['department_id']
-            st.write(f"🔍 DEBUG department_id:")
-            st.write(f"  - Type: {type(dept_id_val)}")
-            st.write(f"  - Module: {type(dept_id_val).__module__}")
-            st.write(f"  - Value: {dept_id_val}")
-            st.write(f"  - Repr: {repr(dept_id_val)}")
-            if hasattr(dept_id_val, '__dict__'):
-                st.write(f"  - Dict: {dept_id_val.__dict__}")
-
             # Get locations for this manager's department
             # Convert DataFrame value to Python int before passing to DB
-            locs_in_dept = db.get_locations_by_department(safe_int_id(dept_id_val))
+            locs_in_dept = db.get_locations_by_department(safe_int_id(manager['department_id']))
 
             if locs_in_dept.empty:
                 st.info(f"Žádné lokality pro oddělení {manager['department']}")

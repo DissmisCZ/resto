@@ -479,7 +479,8 @@ def update_location_department(location_id, department_id):
 def get_operational_managers():
     """Get all active operational managers"""
     conn = get_connection()
-    df = pd.read_sql_query("""
+    cursor = conn.cursor()
+    cursor.execute("""
         SELECT
             om.id, om.jmeno, om.department_id, d.nazev as department,
             om.email, om.aktivni
@@ -487,8 +488,14 @@ def get_operational_managers():
         JOIN departments d ON om.department_id = d.id
         WHERE om.aktivni = TRUE
         ORDER BY d.nazev, om.jmeno
-    """, conn)
+    """)
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['id', 'jmeno', 'department_id', 'department', 'email', 'aktivni'])
     return df
 
 def get_operational_managers_by_department(department_id):
