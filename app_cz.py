@@ -922,8 +922,8 @@ if page == "📊 Přehled":
             st.markdown(f"### 👤 {manager['jmeno']} ({manager['department']})")
 
             # Get locations for this manager's department
-            # safe_convert_id is already in database_postgres.py, no need for conversion here
-            locs_in_dept = db.get_locations_by_department(manager['department_id'])
+            # Convert DataFrame value to Python int before passing to DB
+            locs_in_dept = db.get_locations_by_department(safe_int_id(manager['department_id']))
 
             if locs_in_dept.empty:
                 st.info(f"Žádné lokality pro oddělení {manager['department']}")
@@ -935,7 +935,7 @@ if page == "📊 Přehled":
             met_kpis = 0
 
             for _, loc in locs_in_dept.iterrows():
-                eval_data = db.get_monthly_kpi_evaluation(selected_month, loc['id'])
+                eval_data = db.get_monthly_kpi_evaluation(selected_month, safe_int_id(loc['id']))
                 if not eval_data.empty:
                     total_bonus += eval_data['bonus_procento'].sum()
                     total_kpis += len(eval_data)
@@ -969,7 +969,7 @@ if page == "📊 Přehled":
                 for _, loc in locs_in_dept.iterrows():
                     st.markdown(f"**📍 {loc['nazev']}**")
 
-                    eval_data = db.get_monthly_kpi_evaluation(selected_month, loc['id'])
+                    eval_data = db.get_monthly_kpi_evaluation(selected_month, safe_int_id(loc['id']))
 
                     if eval_data.empty:
                         st.info(f"ℹ️ Žádná data pro {loc['nazev']} v {format_month(selected_month)}")
