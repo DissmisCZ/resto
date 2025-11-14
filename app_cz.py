@@ -2123,39 +2123,39 @@ elif page == "⚙️ Admin":
         with col1:
             st.markdown("#### 📁 Základní tabulky")
             cursor.execute("SELECT COUNT(*) FROM departments WHERE aktivni = TRUE")
-            dept_count = cursor.fetchone()[0]
+            dept_count = cursor.fetchone()['count']
             st.metric("Oddělení", dept_count)
 
             cursor.execute("SELECT COUNT(*) FROM locations WHERE aktivni = TRUE")
-            loc_count = cursor.fetchone()[0]
+            loc_count = cursor.fetchone()['count']
             st.metric("Lokality", loc_count)
 
             cursor.execute("SELECT COUNT(*) FROM operational_managers WHERE aktivni = TRUE")
-            mgr_count = cursor.fetchone()[0]
+            mgr_count = cursor.fetchone()['count']
             st.metric("Provozní", mgr_count)
 
         with col2:
             st.markdown("#### 📊 KPI")
             cursor.execute("SELECT COUNT(*) FROM kpi_definitions WHERE aktivni = TRUE")
-            kpi_count = cursor.fetchone()[0]
+            kpi_count = cursor.fetchone()['count']
             st.metric("KPI Definice", kpi_count)
 
             cursor.execute("SELECT COUNT(*) FROM kpi_thresholds")
-            threshold_count = cursor.fetchone()[0]
+            threshold_count = cursor.fetchone()['count']
             st.metric("KPI Hranice", threshold_count)
 
         with col3:
             st.markdown("#### 💾 Data")
             cursor.execute("SELECT COUNT(*) FROM monthly_kpi_data WHERE status = 'ACTIVE'")
-            data_count = cursor.fetchone()[0]
+            data_count = cursor.fetchone()['count']
             st.metric("Měsíční data (lokality)", data_count)
 
             cursor.execute("SELECT COUNT(*) FROM monthly_department_kpi_data WHERE status = 'ACTIVE'")
-            dept_data_count = cursor.fetchone()[0]
+            dept_data_count = cursor.fetchone()['count']
             st.metric("Měsíční data (oddělení)", dept_data_count)
 
             cursor.execute("SELECT COUNT(*) FROM monthly_kpi_evaluation")
-            eval_count = cursor.fetchone()[0]
+            eval_count = cursor.fetchone()['count']
             if eval_count == 0 and data_count > 0:
                 st.metric("⚠️ Vyhodnocení bonusů", eval_count, delta="Chybí výpočet!", delta_color="off")
             else:
@@ -2258,7 +2258,7 @@ elif page == "⚙️ Admin":
 
         # Check if thresholds exist
         cursor.execute("SELECT COUNT(*) FROM kpi_thresholds")
-        threshold_count = cursor.fetchone()[0]
+        threshold_count = cursor.fetchone()['count']
         if threshold_count == 0:
             problems.append("❌ **Žádné KPI hranice!** Bez hranic se nemohou počítat bonusy.")
             st.error("⚠️ KRITICKÝ PROBLÉM: Nejsou definované hranice pro KPI! Přejděte na tab 'KPI Hranice' a nastavte pravidla pro bonusy.")
@@ -2267,9 +2267,9 @@ elif page == "⚙️ Admin":
 
         # Check if data needs recalculation
         cursor.execute("SELECT COUNT(*) FROM monthly_kpi_data WHERE status = 'ACTIVE'")
-        data_count = cursor.fetchone()[0]
+        data_count = cursor.fetchone()['count']
         cursor.execute("SELECT COUNT(*) FROM monthly_kpi_evaluation")
-        eval_count = cursor.fetchone()[0]
+        eval_count = cursor.fetchone()['count']
 
         if data_count > 0 and eval_count == 0:
             problems.append("❌ **Chybí vyhodnocení!** Máte data ale nebyla spočítána.")
