@@ -922,7 +922,8 @@ if page == "📊 Přehled":
             st.markdown(f"### 👤 {manager['jmeno']} ({manager['department']})")
 
             # Get locations for this manager's department
-            locs_in_dept = db.get_locations_by_department(int(manager['department_id']))
+            # safe_convert_id is already in database_postgres.py, no need for conversion here
+            locs_in_dept = db.get_locations_by_department(manager['department_id'])
 
             if locs_in_dept.empty:
                 st.info(f"Žádné lokality pro oddělení {manager['department']}")
