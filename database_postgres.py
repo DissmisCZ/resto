@@ -16,6 +16,22 @@ from pathlib import Path
 import io
 import streamlit as st
 from functools import lru_cache
+import numpy as np
+
+def safe_convert_id(value):
+    """Safely convert any ID value to Python int (handles numpy, pandas types)"""
+    if value is None:
+        return None
+    if isinstance(value, (int, np.integer)):
+        return int(value)
+    if isinstance(value, (float, np.floating)):
+        return int(value)
+    if isinstance(value, bytes):
+        return int.from_bytes(value, byteorder='little')
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        raise ValueError(f"Cannot convert {type(value).__name__} to int: {value}")
 
 def get_connection():
     """Get PostgreSQL database connection from Streamlit secrets"""
@@ -377,6 +393,7 @@ def get_locations():
 
 def get_locations_by_department(department_id):
     """Get all locations in a department"""
+    department_id = safe_convert_id(department_id)
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -397,6 +414,7 @@ def get_locations_by_department(department_id):
 
 def add_location(nazev, department_id, popis=None):
     """Add new location"""
+    department_id = safe_convert_id(department_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -415,6 +433,8 @@ def add_location(nazev, department_id, popis=None):
 
 def update_location_department(location_id, department_id):
     """Update location's department"""
+    location_id = safe_convert_id(location_id)
+    department_id = safe_convert_id(department_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -452,18 +472,27 @@ def get_operational_managers():
 
 def get_operational_managers_by_department(department_id):
     """Get operational managers for a department"""
+    department_id = safe_convert_id(department_id)
     conn = get_connection()
-    df = pd.read_sql_query("""
+    cursor = conn.cursor()
+    cursor.execute("""
         SELECT id, jmeno, email
         FROM operational_managers
         WHERE department_id = %s AND aktivni = TRUE
         ORDER BY jmeno
-    """, conn, params=(department_id,))
+    """, (department_id,))
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['id', 'jmeno', 'email'])
     return df
 
 def add_operational_manager(jmeno, department_id, email=None):
     """Add new operational manager"""
+    department_id = safe_convert_id(department_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -484,25 +513,32 @@ def add_operational_manager(jmeno, department_id, email=None):
 
 def get_manager_kpis(manager_id):
     """Get all KPIs assigned to a manager"""
+    manager_id = safe_convert_id(manager_id)
     conn = get_connection()
-    df = pd.read_sql_query("""
+    cursor = conn.cursor()
+    cursor.execute("""
         SELECT k.id, k.nazev, k.jednotka, k.popis
         FROM manager_kpi_assignments a
         JOIN kpi_definitions k ON a.kpi_id = k.id
         WHERE a.manager_id = %s AND k.aktivni = TRUE
         ORDER BY k.poradi
-    """, conn, params=(manager_id,))
+    """, (manager_id,))
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['id', 'nazev', 'jednotka', 'popis'])
     return df
 
 def set_manager_kpis(manager_id, kpi_ids):
     """Set all KPIs for a manager (replaces existing)"""
+    manager_id = safe_convert_id(manager_id)
+    kpi_ids = [safe_convert_id(k) for k in kpi_ids] if kpi_ids else []
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        # Ensure IDs are integers
-        manager_id = int(manager_id)
-        kpi_ids = [int(k) for k in kpi_ids] if kpi_ids else []
 
         # Remove all existing assignments
         cursor.execute("DELETE FROM manager_kpi_assignments WHERE manager_id = %s", (manager_id,))
@@ -540,6 +576,7 @@ def get_kpi_definitions():
 
 def get_kpi_thresholds(kpi_id=None):
     """Get KPI thresholds"""
+    kpi_id = safe_convert_id(kpi_id)
     conn = get_connection()
     if kpi_id:
         df = pd.read_sql_query("""
@@ -561,6 +598,7 @@ def get_kpi_thresholds(kpi_id=None):
 
 def calculate_bonus_for_value(kpi_id, hodnota):
     """Calculate bonus percentage for a KPI value based on thresholds"""
+    kpi_id = safe_convert_id(kpi_id)
     if pd.isna(hodnota):
         return 0
 
@@ -603,6 +641,8 @@ def calculate_bonus_for_value(kpi_id, hodnota):
 
 def add_monthly_kpi_data(mesic, location_id, kpi_id, hodnota, poznamka=None, zdroj="MANUAL"):
     """Add or update monthly KPI data"""
+    location_id = safe_convert_id(location_id)
+    kpi_id = safe_convert_id(kpi_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -645,6 +685,8 @@ def add_monthly_kpi_data(mesic, location_id, kpi_id, hodnota, poznamka=None, zdr
 
 def get_monthly_kpi_data(mesic=None, location_id=None, kpi_id=None):
     """Get monthly KPI data with filters"""
+    location_id = safe_convert_id(location_id)
+    kpi_id = safe_convert_id(kpi_id)
     conn = get_connection()
 
     query = """
@@ -686,6 +728,7 @@ def get_monthly_kpi_data(mesic=None, location_id=None, kpi_id=None):
 
 def get_monthly_kpi_by_location_month(mesic, location_id):
     """Get all KPI data for a location in a month"""
+    location_id = safe_convert_id(location_id)
     conn = get_connection()
     df = pd.read_sql_query("""
         SELECT
@@ -701,6 +744,7 @@ def get_monthly_kpi_by_location_month(mesic, location_id):
 
 def delete_monthly_kpi_data(mesic, location_id):
     """Delete all KPI data for a location in a month"""
+    location_id = safe_convert_id(location_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -729,6 +773,7 @@ def delete_monthly_kpi_data(mesic, location_id):
 
 def calculate_monthly_kpi_evaluation(mesic, location_id=None):
     """Calculate KPI evaluation and bonuses for a month"""
+    location_id = safe_convert_id(location_id)
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -770,6 +815,7 @@ def calculate_monthly_kpi_evaluation(mesic, location_id=None):
 
 def get_monthly_kpi_evaluation(mesic, location_id=None):
     """Get KPI evaluation for a month"""
+    location_id = safe_convert_id(location_id)
     conn = get_connection()
 
     query = """
@@ -824,6 +870,7 @@ def get_monthly_kpi_evaluation(mesic, location_id=None):
 
 def get_department_monthly_summary(mesic=None, department_id=None):
     """Get department monthly KPI summary"""
+    department_id = safe_convert_id(department_id)
     conn = get_connection()
 
     query = """
@@ -879,6 +926,7 @@ def get_department_monthly_summary(mesic=None, department_id=None):
 
 def calculate_monthly_department_kpi_evaluation(mesic, department_id=None):
     """Calculate KPI evaluation and bonuses for departments with own KPI"""
+    department_id = safe_convert_id(department_id)
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -1106,6 +1154,7 @@ def get_all_months_with_data():
 
 def delete_department(department_id):
     """Soft delete department (set aktivni=FALSE)"""
+    department_id = safe_convert_id(department_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -1132,6 +1181,7 @@ def delete_department(department_id):
 
 def delete_location(location_id):
     """Soft delete location (set aktivni=FALSE)"""
+    location_id = safe_convert_id(location_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -1147,6 +1197,7 @@ def delete_location(location_id):
 
 def delete_operational_manager(manager_id):
     """Soft delete operational manager (set aktivni=FALSE)"""
+    manager_id = safe_convert_id(manager_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -1190,6 +1241,7 @@ def add_kpi_definition(nazev, popis=None, jednotka=None, typ_vypoctu=None, porad
 
 def update_kpi_definition(kpi_id, nazev=None, popis=None, jednotka=None, typ_vypoctu=None, poradi=None):
     """Update KPI definition"""
+    kpi_id = safe_convert_id(kpi_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -1231,6 +1283,7 @@ def update_kpi_definition(kpi_id, nazev=None, popis=None, jednotka=None, typ_vyp
 
 def delete_kpi_definition(kpi_id):
     """Soft delete KPI definition (set aktivni=FALSE)"""
+    kpi_id = safe_convert_id(kpi_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -1259,6 +1312,7 @@ def get_all_kpi_definitions(include_inactive=False):
 
 def add_kpi_threshold(kpi_id, operator, bonus_procento, min_hodnota=None, max_hodnota=None, popis=None, poradi=None):
     """Add new KPI threshold"""
+    kpi_id = safe_convert_id(kpi_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -1295,6 +1349,7 @@ def add_kpi_threshold(kpi_id, operator, bonus_procento, min_hodnota=None, max_ho
 
 def update_kpi_threshold(threshold_id, min_hodnota, max_hodnota, operator, bonus_procento, popis, poradi):
     """Update KPI threshold - updates all fields"""
+    threshold_id = safe_convert_id(threshold_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -1325,6 +1380,7 @@ def update_kpi_threshold(threshold_id, min_hodnota, max_hodnota, operator, bonus
 
 def delete_kpi_threshold(threshold_id):
     """Delete KPI threshold"""
+    threshold_id = safe_convert_id(threshold_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -1348,6 +1404,7 @@ def delete_kpi_threshold(threshold_id):
 
 def update_department_vlastni_kpi(department_id, ma_vlastni_kpi):
     """Update whether department has own KPI values"""
+    department_id = safe_convert_id(department_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -1367,6 +1424,8 @@ def update_department_vlastni_kpi(department_id, ma_vlastni_kpi):
 
 def add_monthly_department_kpi_data(mesic, department_id, kpi_id, hodnota, poznamka=None, zdroj="MANUAL"):
     """Add or update monthly KPI data for department with own KPI"""
+    department_id = safe_convert_id(department_id)
+    kpi_id = safe_convert_id(kpi_id)
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -1390,6 +1449,7 @@ def add_monthly_department_kpi_data(mesic, department_id, kpi_id, hodnota, pozna
 
 def get_monthly_department_kpi_data(mesic, department_id=None):
     """Get monthly KPI data for department(s) with own KPI"""
+    department_id = safe_convert_id(department_id)
     conn = get_connection()
     if department_id:
         query = """
@@ -1435,6 +1495,8 @@ def get_department_kpi_value(mesic, department_id, kpi_id):
     Get KPI value for department - either own value or average from locations
     Returns: (hodnota, zdroj) where zdroj is 'VLASTNI' or 'PRUMER_Z_LOKALIT'
     """
+    department_id = safe_convert_id(department_id)
+    kpi_id = safe_convert_id(kpi_id)
     conn = get_connection()
     cursor = conn.cursor()
 
