@@ -367,13 +367,20 @@ def insert_default_data():
 def get_departments():
     """Get all active departments"""
     conn = get_connection()
-    df = pd.read_sql_query("""
+    cursor = conn.cursor()
+    cursor.execute("""
         SELECT id, nazev, vedouci, popis, aktivni
         FROM departments
         WHERE aktivni = TRUE
         ORDER BY nazev
-    """, conn)
+    """)
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['id', 'nazev', 'vedouci', 'popis', 'aktivni'])
     return df
 
 def add_department(nazev, vedouci=None, popis=None):
@@ -400,7 +407,8 @@ def add_department(nazev, vedouci=None, popis=None):
 def get_locations():
     """Get all active locations with department info"""
     conn = get_connection()
-    df = pd.read_sql_query("""
+    cursor = conn.cursor()
+    cursor.execute("""
         SELECT
             l.id, l.nazev, l.department_id, d.nazev as department,
             l.popis, l.aktivni
@@ -408,8 +416,14 @@ def get_locations():
         JOIN departments d ON l.department_id = d.id
         WHERE l.aktivni = TRUE
         ORDER BY d.nazev, l.nazev
-    """, conn)
+    """)
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['id', 'nazev', 'department_id', 'department', 'popis', 'aktivni'])
     return df
 
 def get_locations_by_department(department_id):
@@ -593,35 +607,49 @@ def set_manager_kpis(manager_id, kpi_ids):
 def get_kpi_definitions():
     """Get all active KPI definitions"""
     conn = get_connection()
-    df = pd.read_sql_query("""
+    cursor = conn.cursor()
+    cursor.execute("""
         SELECT id, nazev, popis, jednotka, typ_vypoctu, poradi
         FROM kpi_definitions
         WHERE aktivni = TRUE
         ORDER BY poradi
-    """, conn)
+    """)
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['id', 'nazev', 'popis', 'jednotka', 'typ_vypoctu', 'poradi'])
     return df
 
 def get_kpi_thresholds(kpi_id=None):
     """Get KPI thresholds"""
     kpi_id = safe_convert_id(kpi_id)
     conn = get_connection()
+    cursor = conn.cursor()
     if kpi_id:
-        df = pd.read_sql_query("""
+        cursor.execute("""
             SELECT t.*, k.nazev as kpi_nazev, k.jednotka
             FROM kpi_thresholds t
             JOIN kpi_definitions k ON t.kpi_id = k.id
             WHERE t.kpi_id = %s
             ORDER BY t.poradi
-        """, conn, params=(kpi_id,))
+        """, (kpi_id,))
     else:
-        df = pd.read_sql_query("""
+        cursor.execute("""
             SELECT t.*, k.nazev as kpi_nazev, k.jednotka
             FROM kpi_thresholds t
             JOIN kpi_definitions k ON t.kpi_id = k.id
             ORDER BY k.poradi, t.poradi
-        """, conn)
+        """)
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['id', 'kpi_id', 'operator', 'min_hodnota', 'max_hodnota', 'bonus_procento', 'popis', 'poradi', 'kpi_nazev', 'jednotka'])
     return df
 
 def calculate_bonus_for_value(kpi_id, hodnota):
@@ -758,7 +786,8 @@ def get_monthly_kpi_by_location_month(mesic, location_id):
     """Get all KPI data for a location in a month"""
     location_id = safe_convert_id(location_id)
     conn = get_connection()
-    df = pd.read_sql_query("""
+    cursor = conn.cursor()
+    cursor.execute("""
         SELECT
             d.kpi_id, k.nazev, k.jednotka, k.poradi,
             d.hodnota, d.poznamka
@@ -766,8 +795,14 @@ def get_monthly_kpi_by_location_month(mesic, location_id):
         JOIN kpi_definitions k ON d.kpi_id = k.id
         WHERE d.mesic = %s AND d.location_id = %s AND d.status = 'ACTIVE'
         ORDER BY k.poradi
-    """, conn, params=(mesic, location_id))
+    """, (mesic, location_id))
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['kpi_id', 'nazev', 'jednotka', 'poradi', 'hodnota', 'poznamka'])
     return df
 
 def delete_monthly_kpi_data(mesic, location_id):
@@ -1166,17 +1201,22 @@ def import_monthly_data_excel(excel_file):
 def get_all_months_with_data():
     """Get all months that have KPI data"""
     conn = get_connection()
-    df = pd.read_sql_query("""
+    cursor = conn.cursor()
+    cursor.execute("""
         SELECT DISTINCT mesic
         FROM monthly_kpi_data
         WHERE status = 'ACTIVE'
         ORDER BY mesic DESC
-    """, conn)
+    """)
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
 
-    if df.empty:
+    if not results:
         return []
-    return sorted(df['mesic'].unique().tolist(), reverse=True)
+    # Extract mesic values from dict rows
+    months = [row['mesic'] for row in results]
+    return sorted(set(months), reverse=True)
 
 # ============ DELETE FUNCTIONS ============
 
@@ -1328,12 +1368,18 @@ def delete_kpi_definition(kpi_id):
 def get_all_kpi_definitions(include_inactive=False):
     """Get all KPI definitions (including inactive if specified)"""
     conn = get_connection()
+    cursor = conn.cursor()
     if include_inactive:
-        query = "SELECT * FROM kpi_definitions ORDER BY poradi, nazev"
+        cursor.execute("SELECT * FROM kpi_definitions ORDER BY poradi, nazev")
     else:
-        query = "SELECT * FROM kpi_definitions WHERE aktivni = TRUE ORDER BY poradi, nazev"
-    df = pd.read_sql_query(query, conn)
+        cursor.execute("SELECT * FROM kpi_definitions WHERE aktivni = TRUE ORDER BY poradi, nazev")
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['id', 'nazev', 'popis', 'jednotka', 'typ_vypoctu', 'poradi', 'aktivni'])
     return df
 
 # ============ KPI THRESHOLDS CRUD ============
@@ -1572,11 +1618,18 @@ def get_department_kpi_value(mesic, department_id, kpi_id):
 def get_departments_with_vlastni_kpi():
     """Get list of departments that have own KPI values"""
     conn = get_connection()
-    df = pd.read_sql_query("""
+    cursor = conn.cursor()
+    cursor.execute("""
         SELECT id, nazev, vedouci, ma_vlastni_kpi
         FROM departments
         WHERE aktivni = TRUE
         ORDER BY nazev
-    """, conn)
+    """)
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['id', 'nazev', 'vedouci', 'ma_vlastni_kpi'])
     return df
