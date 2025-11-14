@@ -378,13 +378,21 @@ def get_locations():
 def get_locations_by_department(department_id):
     """Get all locations in a department"""
     conn = get_connection()
-    df = pd.read_sql_query("""
+    cursor = conn.cursor()
+    cursor.execute("""
         SELECT id, nazev, popis
         FROM locations
         WHERE department_id = %s AND aktivni = TRUE
         ORDER BY nazev
-    """, conn, params=(department_id,))
+    """, (department_id,))
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+    # Convert to DataFrame
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['id', 'nazev', 'popis'])
     return df
 
 def add_location(nazev, department_id, popis=None):
@@ -664,8 +672,16 @@ def get_monthly_kpi_data(mesic=None, location_id=None, kpi_id=None):
 
     query += " ORDER BY d.mesic DESC, l.nazev, k.poradi"
 
-    df = pd.read_sql_query(query, conn, params=params)
+    cursor = conn.cursor()
+    cursor.execute(query, tuple(params))
+    results = cursor.fetchall()
+    cursor.close()
     conn.close()
+
+    if results:
+        df = pd.DataFrame(results)
+    else:
+        df = pd.DataFrame(columns=['id', 'mesic', 'location_id', 'location', 'kpi_id', 'kpi_nazev', 'jednotka', 'hodnota', 'status', 'poznamka', 'zdroj', 'created_at', 'updated_at'])
     return df
 
 def get_monthly_kpi_by_location_month(mesic, location_id):
@@ -774,8 +790,36 @@ def get_monthly_kpi_evaluation(mesic, location_id=None):
 
     query += " ORDER BY l.nazev, k.poradi"
 
-    df = pd.read_sql_query(query, conn, params=params)
+    cursor = conn.cursor()
+
+
+    cursor.execute(query, tuple(params) if params else ())
+
+
+    results = cursor.fetchall()
+
+
+    cursor.close()
+
+
     conn.close()
+
+
+    
+
+
+    if results:
+
+
+        df = pd.DataFrame(results)
+
+
+    else:
+
+
+        df = pd.DataFrame()
+
+
     return df
 
 def get_department_monthly_summary(mesic=None, department_id=None):
@@ -801,8 +845,36 @@ def get_department_monthly_summary(mesic=None, department_id=None):
 
     query += " ORDER BY s.mesic DESC, d.nazev"
 
-    df = pd.read_sql_query(query, conn, params=params)
+    cursor = conn.cursor()
+
+
+    cursor.execute(query, tuple(params) if params else ())
+
+
+    results = cursor.fetchall()
+
+
+    cursor.close()
+
+
     conn.close()
+
+
+    
+
+
+    if results:
+
+
+        df = pd.DataFrame(results)
+
+
+    else:
+
+
+        df = pd.DataFrame()
+
+
     return df
 
 def calculate_monthly_department_kpi_evaluation(mesic, department_id=None):
@@ -1329,7 +1401,14 @@ def get_monthly_department_kpi_data(mesic, department_id=None):
             WHERE d.mesic = %s AND d.department_id = %s AND d.status = 'ACTIVE'
             ORDER BY k.poradi
         """
-        df = pd.read_sql_query(query, conn, params=(mesic, department_id))
+        cursor = conn.cursor()
+        cursor.execute(query, (mesic, department_id))
+        results = cursor.fetchall()
+        cursor.close()
+        if results:
+            df = pd.DataFrame(results)
+        else:
+            df = pd.DataFrame(columns=['mesic', 'department_id', 'department_nazev', 'kpi_id', 'kpi_nazev', 'hodnota', 'poznamka', 'zdroj'])
     else:
         query = """
             SELECT d.mesic, d.department_id, dept.nazev as department_nazev,
@@ -1340,7 +1419,14 @@ def get_monthly_department_kpi_data(mesic, department_id=None):
             WHERE d.mesic = %s AND d.status = 'ACTIVE'
             ORDER BY dept.nazev, k.poradi
         """
-        df = pd.read_sql_query(query, conn, params=(mesic,))
+        cursor = conn.cursor()
+        cursor.execute(query, (mesic,))
+        results = cursor.fetchall()
+        cursor.close()
+        if results:
+            df = pd.DataFrame(results)
+        else:
+            df = pd.DataFrame(columns=['mesic', 'department_id', 'department_nazev', 'kpi_id', 'kpi_nazev', 'hodnota', 'poznamka', 'zdroj'])
     conn.close()
     return df
 
