@@ -1333,16 +1333,18 @@ if page == "📊 Přehled":
 
             # Get locations for this manager's department
             # Convert DataFrame value to Python int before passing to DB
-            locs_in_dept = db.get_locations_by_department(safe_int_id(manager['department_id']))
+            dept_id = safe_int_id(manager['department_id'])
+            locs_in_dept = db.get_locations_by_department(dept_id)
 
             if locs_in_dept.empty:
-                st.info(f"Žádné lokality pro oddělení {manager['department']}")
+                st.info(f"ℹ️ Oddělení **{manager['department']}** nemá přiřazené žádné lokality. Přidejte lokality v sekci Admin → Lokality.")
                 continue
 
             # Calculate total bonus for this manager across all locations in department
             total_bonus = 0
             total_kpis = 0
             met_kpis = 0
+            locations_with_data = 0
 
             for _, loc in locs_in_dept.iterrows():
                 eval_data = db.get_monthly_kpi_evaluation(selected_month, safe_int_id(loc['id']))
@@ -1350,8 +1352,13 @@ if page == "📊 Přehled":
                     total_bonus += eval_data['bonus_procento'].sum()
                     total_kpis += len(eval_data)
                     met_kpis += eval_data['splneno'].sum()
+                    locations_with_data += 1
 
             avg_bonus = total_bonus / len(locs_in_dept) if len(locs_in_dept) > 0 else 0
+
+            # Show warning if no data
+            if locations_with_data == 0:
+                st.warning(f"⚠️ Žádná lokalita v oddělení **{manager['department']}** nemá vyhodnocená data pro {format_month(selected_month)}. Zadejte data v sekci 📝 Zadání a klikněte na 🔄 Přepočítat bonusy.")
 
             # Display bonus card
             if avg_bonus >= 50:
