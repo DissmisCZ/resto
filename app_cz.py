@@ -1311,6 +1311,8 @@ if page == "📊 Přehled":
         if st.button("🔄 Přepočítat bonusy", use_container_width=True):
             db.calculate_monthly_kpi_evaluation(selected_month)
             db.calculate_department_summary(selected_month)
+            # Clear cache to show updated results
+            st.cache_data.clear()
             st.success("✅ Bonusy přepočítány")
             st.rerun()
 
@@ -1741,6 +1743,8 @@ elif page == "📝 Zadání":
                     st.session_state.save_message_type = "error"
                 else:
                     db.calculate_monthly_kpi_evaluation(selected_input_month, location_id)
+                    # Clear cache to show updated results
+                    st.cache_data.clear()
                     st.session_state.save_message = f"✅ DATA ÚSPĚŠNĚ ULOŽENA pro {selected_location} - {format_month(selected_input_month)}"
                     st.session_state.save_message_type = "success"
 
@@ -1751,6 +1755,8 @@ elif page == "📝 Zadání":
                 if not existing_data.empty:
                     success, msg = db.delete_monthly_kpi_data(selected_input_month, location_id)
                     if success:
+                        # Clear cache to show updated results
+                        st.cache_data.clear()
                         st.session_state.save_message = f"✅ DATA SMAZÁNA pro {selected_location} - {format_month(selected_input_month)}"
                         st.session_state.save_message_type = "success"
                     else:
@@ -1855,6 +1861,8 @@ elif page == "📝 Zadání":
                     else:
                         # Calculate bonuses and summaries
                         db.calculate_department_summary(selected_dept_month)
+                        # Clear cache to show updated results
+                        st.cache_data.clear()
                         st.session_state.save_message = f"✅ DATA ÚSPĚŠNĚ ULOŽENA pro {selected_department} - {format_month(selected_dept_month)}"
                         st.session_state.save_message_type = "success"
 
@@ -1874,6 +1882,8 @@ elif page == "📝 Zadání":
                             """, (selected_dept_month, department_id))
                             conn.commit()
                             conn.close()
+                            # Clear cache to show updated results
+                            st.cache_data.clear()
                             st.session_state.save_message = f"✅ DATA SMAZÁNA pro {selected_department} - {format_month(selected_dept_month)}"
                             st.session_state.save_message_type = "success"
                         except Exception as e:
@@ -1908,8 +1918,11 @@ elif page == "📝 Zadání":
             imported, errors = db.import_monthly_data_csv(csv_content)
 
             if imported > 0:
+                # Clear cache to show updated results
+                st.cache_data.clear()
                 st.session_state.save_message = f"✅ IMPORTOVÁNO {imported} záznamů"
                 st.session_state.save_message_type = "success"
+                st.rerun()
 
             if errors:
                 st.warning(f"⚠️ {len(errors)} chyb:")
@@ -1939,8 +1952,11 @@ elif page == "📝 Zadání":
             imported, errors = db.import_monthly_data_excel(uploaded_excel)
 
             if imported > 0:
+                # Clear cache to show updated results
+                st.cache_data.clear()
                 st.session_state.save_message = f"✅ IMPORTOVÁNO {imported} záznamů z Excelu"
                 st.session_state.save_message_type = "success"
+                st.rerun()
 
             if errors:
                 st.warning(f"⚠️ {len(errors)} chyb:")
@@ -2739,6 +2755,8 @@ elif page == "⚙️ Admin":
                         for month in months:
                             db.calculate_monthly_kpi_evaluation(month)
                             db.calculate_department_summary(month)
+                    # Clear cache to show updated results
+                    st.cache_data.clear()
                     st.success(f"✅ Úspěšně přepočítáno {len(months)} měsíců!")
                     st.rerun()
                 else:
