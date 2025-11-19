@@ -858,7 +858,7 @@ def calculate_monthly_kpi_evaluation(mesic, location_id=None):
     evaluations = cursor.fetchall()
 
     for row in evaluations:
-        loc_id, kpi_id, value = row
+        loc_id, kpi_id, value = row['location_id'], row['kpi_id'], row['hodnota']
         bonus = calculate_bonus_for_value(kpi_id, value)
         splneno = 1 if bonus > 0 else 0
 
