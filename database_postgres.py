@@ -841,45 +841,59 @@ def delete_monthly_kpi_data(mesic, location_id):
 
 def calculate_monthly_kpi_evaluation(mesic, location_id=None):
     """Calculate KPI evaluation and bonuses for a month"""
-    location_id = safe_convert_id(location_id)
-    conn = get_connection()
-    cursor = conn.cursor()
+    try:
+        location_id = safe_convert_id(location_id)
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    if location_id:
-        cursor.execute("""
-            SELECT d.location_id, d.kpi_id, d.hodnota
-            FROM monthly_kpi_data d
-            WHERE d.mesic = %s AND d.location_id = %s AND d.status = 'ACTIVE'
-        """, (mesic, location_id))
-    else:
-        cursor.execute("""
-            SELECT d.location_id, d.kpi_id, d.hodnota
-            FROM monthly_kpi_data d
-            WHERE d.mesic = %s AND d.status = 'ACTIVE'
-        """, (mesic,))
+        if location_id:
+            cursor.execute("""
+                SELECT d.location_id, d.kpi_id, d.hodnota
+                FROM monthly_kpi_data d
+                WHERE d.mesic = %s AND d.location_id = %s AND d.status = 'ACTIVE'
+            """, (mesic, location_id))
+        else:
+            cursor.execute("""
+                SELECT d.location_id, d.kpi_id, d.hodnota
+                FROM monthly_kpi_data d
+                WHERE d.mesic = %s AND d.status = 'ACTIVE'
+            """, (mesic,))
 
-    evaluations = cursor.fetchall()
+        evaluations = cursor.fetchall()
 
-    for row in evaluations:
-        loc_id, kpi_id, value = row['location_id'], row['kpi_id'], row['hodnota']
-        bonus = calculate_bonus_for_value(kpi_id, value)
-        splneno = 1 if bonus > 0 else 0
+        if not evaluations:
+            cursor.close()
+            conn.close()
+            return 0  # No data to process
 
-        cursor.execute("""
-            INSERT INTO monthly_kpi_evaluation
-            (mesic, location_id, kpi_id, hodnota, splneno, bonus_procento, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
-            ON CONFLICT(mesic, location_id, kpi_id)
-            DO UPDATE SET
-                hodnota = EXCLUDED.hodnota,
-                splneno = EXCLUDED.splneno,
-                bonus_procento = EXCLUDED.bonus_procento,
-                updated_at = CURRENT_TIMESTAMP
-        """, (mesic, loc_id, kpi_id, value, splneno, bonus))
+        processed = 0
+        for row in evaluations:
+            loc_id, kpi_id, value = row['location_id'], row['kpi_id'], row['hodnota']
+            bonus = calculate_bonus_for_value(kpi_id, value)
+            splneno = 1 if bonus > 0 else 0
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+            cursor.execute("""
+                INSERT INTO monthly_kpi_evaluation
+                (mesic, location_id, kpi_id, hodnota, splneno, bonus_procento, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT(mesic, location_id, kpi_id)
+                DO UPDATE SET
+                    hodnota = EXCLUDED.hodnota,
+                    splneno = EXCLUDED.splneno,
+                    bonus_procento = EXCLUDED.bonus_procento,
+                    updated_at = CURRENT_TIMESTAMP
+            """, (mesic, loc_id, kpi_id, value, splneno, bonus))
+            processed += 1
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return processed
+    except Exception as e:
+        if 'conn' in locals():
+            conn.close()
+        st.error(f"Chyba při výpočtu bonusů: {str(e)}")
+        return 0
 
 @st.cache_data(ttl=1800)  # Cache for 30 minutes (this changes more often)
 def get_monthly_kpi_evaluation(mesic, location_id=None):

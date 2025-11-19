@@ -1309,11 +1309,14 @@ if page == "📊 Přehled":
     col1, col2 = st.columns([3, 1])
     with col2:
         if st.button("🔄 Přepočítat bonusy", use_container_width=True):
-            db.calculate_monthly_kpi_evaluation(selected_month)
+            processed = db.calculate_monthly_kpi_evaluation(selected_month)
             db.calculate_department_summary(selected_month)
             # Clear cache to show updated results
             st.cache_data.clear()
-            st.success("✅ Bonusy přepočítány")
+            if processed > 0:
+                st.success(f"✅ Přepočítáno {processed} záznamů")
+            else:
+                st.warning("⚠️ Žádná data k přepočítání pro tento měsíc")
             st.rerun()
 
     st.markdown("---")
@@ -1742,10 +1745,10 @@ elif page == "📝 Zadání":
                     st.session_state.save_message = f"❌ Chyby při ukládání: {', '.join(errors)}"
                     st.session_state.save_message_type = "error"
                 else:
-                    db.calculate_monthly_kpi_evaluation(selected_input_month, location_id)
+                    processed = db.calculate_monthly_kpi_evaluation(selected_input_month, location_id)
                     # Clear cache to show updated results
                     st.cache_data.clear()
-                    st.session_state.save_message = f"✅ DATA ÚSPĚŠNĚ ULOŽENA pro {selected_location} - {format_month(selected_input_month)}"
+                    st.session_state.save_message = f"✅ DATA ULOŽENA ({processed} záznamů vyhodnoceno) - {selected_location} - {format_month(selected_input_month)}"
                     st.session_state.save_message_type = "success"
 
                 st.rerun()
@@ -2751,13 +2754,18 @@ elif page == "⚙️ Admin":
             if st.button("♻️ PŘEPOČÍTAT VŠECHNY BONUSY", key="recalc_all_btn", type="primary"):
                 months = db.get_all_months_with_data()
                 if months:
+                    total_processed = 0
                     with st.spinner("Počítám bonusy..."):
                         for month in months:
-                            db.calculate_monthly_kpi_evaluation(month)
+                            processed = db.calculate_monthly_kpi_evaluation(month)
+                            total_processed += processed
                             db.calculate_department_summary(month)
                     # Clear cache to show updated results
                     st.cache_data.clear()
-                    st.success(f"✅ Úspěšně přepočítáno {len(months)} měsíců!")
+                    if total_processed > 0:
+                        st.success(f"✅ Úspěšně přepočítáno {total_processed} záznamů z {len(months)} měsíců!")
+                    else:
+                        st.warning(f"⚠️ Zkontrolováno {len(months)} měsíců, ale žádná data k přepočítání")
                     st.rerun()
                 else:
                     st.warning("Žádná data k přepočítání")
