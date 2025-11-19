@@ -1095,7 +1095,8 @@ def calculate_department_summary(mesic):
     departments = cursor.fetchall()
 
     for dept_row in departments:
-        dept_id, ma_vlastni_kpi = dept_row
+        dept_id = dept_row['id']
+        ma_vlastni_kpi = dept_row['ma_vlastni_kpi']
 
         if ma_vlastni_kpi:
             # Department has own KPI - calculate from monthly_department_kpi_data
@@ -1110,8 +1111,10 @@ def calculate_department_summary(mesic):
             total_active = len(kpi_data)
             total_met = 0
 
-            for kpi_id, hodnota in kpi_data:
-                bonus = calculate_bonus_for_value(kpi_id, hodnota)
+            for kpi_row in kpi_data:
+                kpi_id = kpi_row['kpi_id']
+                hodnota = kpi_row['hodnota']
+                bonus = calculate_bonus_for_value(kpi_id, hodnota, cursor)
                 total_bonus += bonus
                 if bonus > 0:
                     total_met += 1
