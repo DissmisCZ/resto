@@ -653,49 +653,66 @@ def get_kpi_thresholds(kpi_id=None):
         df = pd.DataFrame(columns=['id', 'kpi_id', 'operator', 'min_hodnota', 'max_hodnota', 'bonus_procento', 'popis', 'poradi', 'kpi_nazev', 'jednotka'])
     return df
 
-def calculate_bonus_for_value(kpi_id, hodnota):
-    """Calculate bonus percentage for a KPI value based on thresholds"""
+def calculate_bonus_for_value(kpi_id, hodnota, cursor=None):
+    """Calculate bonus percentage for a KPI value based on thresholds
+
+    Args:
+        kpi_id: KPI identifier
+        hodnota: KPI value to evaluate
+        cursor: Optional database cursor (if None, creates new connection)
+    """
     kpi_id = safe_convert_id(kpi_id)
     if pd.isna(hodnota):
         return 0
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    # Use provided cursor or create new connection
+    should_close = False
+    if cursor is None:
+        conn = get_connection()
+        cursor = conn.cursor()
+        should_close = True
 
-    cursor.execute("""
-        SELECT min_hodnota, max_hodnota, operator, bonus_procento
-        FROM kpi_thresholds
-        WHERE kpi_id = %s
-        ORDER BY poradi
-    """, (kpi_id,))
+    try:
+        cursor.execute("""
+            SELECT min_hodnota, max_hodnota, operator, bonus_procento
+            FROM kpi_thresholds
+            WHERE kpi_id = %s
+            ORDER BY poradi
+        """, (kpi_id,))
 
-    thresholds = cursor.fetchall()
-    cursor.close()
-    conn.close()
+        thresholds = cursor.fetchall()
 
-    for threshold in thresholds:
-        min_val = threshold['min_hodnota']
-        max_val = threshold['max_hodnota']
-        operator = threshold['operator']
-        bonus = threshold['bonus_procento']
+        if not thresholds:
+            st.warning(f"⚠️ Žádné thresholdy pro KPI ID {kpi_id}")
+            return 0
 
-        if operator == "≥" and min_val is not None:
-            if hodnota >= min_val:
-                return bonus
-        elif operator == "≤" and max_val is not None:
-            if hodnota <= max_val:
-                return bonus
-        elif operator == "<" and max_val is not None:
-            if hodnota < max_val:
-                return bonus
-        elif operator == ">" and min_val is not None:
-            if hodnota > min_val:
-                return bonus
-        elif operator == "mezi" and min_val is not None and max_val is not None:
-            if min_val <= hodnota <= max_val:
-                return bonus
+        for threshold in thresholds:
+            min_val = threshold['min_hodnota']
+            max_val = threshold['max_hodnota']
+            operator = threshold['operator']
+            bonus = threshold['bonus_procento']
 
-    return 0
+            if operator == "≥" and min_val is not None:
+                if hodnota >= min_val:
+                    return bonus
+            elif operator == "≤" and max_val is not None:
+                if hodnota <= max_val:
+                    return bonus
+            elif operator == "<" and max_val is not None:
+                if hodnota < max_val:
+                    return bonus
+            elif operator == ">" and min_val is not None:
+                if hodnota > min_val:
+                    return bonus
+            elif operator == "mezi" and min_val is not None and max_val is not None:
+                if min_val <= hodnota <= max_val:
+                    return bonus
+
+        return 0
+    finally:
+        if should_close:
+            cursor.close()
+            conn.close()
 
 # ============ MONTHLY KPI DATA FUNCTIONS ============
 
@@ -839,9 +856,19 @@ def delete_monthly_kpi_data(mesic, location_id):
 
 # ============ MONTHLY EVALUATION & BONUS CALCULATION ============
 
-def calculate_monthly_kpi_evaluation(mesic, location_id=None):
-    """Calculate KPI evaluation and bonuses for a month"""
+def calculate_monthly_kpi_evaluation(mesic, location_id=None, verbose=False):
+    """Calculate KPI evaluation and bonuses for a month
+
+    Args:
+        mesic: Month to calculate for
+        location_id: Optional specific location ID
+        verbose: If True, show detailed progress messages
+    """
+    import traceback
     try:
+        if verbose:
+            st.info(f"🔄 Výpočet bonusů pro {mesic}" + (f" (lokalita {location_id})" if location_id else ""))
+
         location_id = safe_convert_id(location_id)
         conn = get_connection()
         cursor = conn.cursor()
@@ -867,32 +894,51 @@ def calculate_monthly_kpi_evaluation(mesic, location_id=None):
             return 0  # No data to process
 
         processed = 0
-        for row in evaluations:
-            loc_id, kpi_id, value = row['location_id'], row['kpi_id'], row['hodnota']
-            bonus = calculate_bonus_for_value(kpi_id, value)
-            splneno = 1 if bonus > 0 else 0
+        errors = []
+        for idx, row in enumerate(evaluations):
+            try:
+                loc_id, kpi_id, value = row['location_id'], row['kpi_id'], row['hodnota']
 
-            cursor.execute("""
-                INSERT INTO monthly_kpi_evaluation
-                (mesic, location_id, kpi_id, hodnota, splneno, bonus_procento, updated_at)
-                VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
-                ON CONFLICT(mesic, location_id, kpi_id)
-                DO UPDATE SET
-                    hodnota = EXCLUDED.hodnota,
-                    splneno = EXCLUDED.splneno,
-                    bonus_procento = EXCLUDED.bonus_procento,
-                    updated_at = CURRENT_TIMESTAMP
-            """, (mesic, loc_id, kpi_id, value, splneno, bonus))
-            processed += 1
+                # Pass cursor to avoid creating new connections
+                bonus = calculate_bonus_for_value(kpi_id, value, cursor)
+                splneno = 1 if bonus > 0 else 0
+
+                cursor.execute("""
+                    INSERT INTO monthly_kpi_evaluation
+                    (mesic, location_id, kpi_id, hodnota, splneno, bonus_procento, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                    ON CONFLICT(mesic, location_id, kpi_id)
+                    DO UPDATE SET
+                        hodnota = EXCLUDED.hodnota,
+                        splneno = EXCLUDED.splneno,
+                        bonus_procento = EXCLUDED.bonus_procento,
+                        updated_at = CURRENT_TIMESTAMP
+                """, (mesic, loc_id, kpi_id, value, splneno, bonus))
+                processed += 1
+            except Exception as e:
+                error_msg = f"Chyba při zpracování záznamu {idx+1}: {str(e)}"
+                errors.append(error_msg)
+                if verbose:
+                    st.error(error_msg)
 
         conn.commit()
         cursor.close()
         conn.close()
+
+        if errors and verbose:
+            st.warning(f"⚠️ Dokončeno s {len(errors)} chybami")
+
         return processed
     except Exception as e:
+        error_trace = traceback.format_exc()
+        if verbose:
+            st.error(f"❌ Chyba při výpočtu bonusů: {str(e)}")
+            st.code(error_trace)
         if 'conn' in locals():
-            conn.close()
-        st.error(f"Chyba při výpočtu bonusů: {str(e)}")
+            try:
+                conn.close()
+            except:
+                pass
         return 0
 
 @st.cache_data(ttl=1800)  # Cache for 30 minutes (this changes more often)

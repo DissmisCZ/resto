@@ -1309,8 +1309,9 @@ if page == "📊 Přehled":
     col1, col2 = st.columns([3, 1])
     with col2:
         if st.button("🔄 Přepočítat bonusy", use_container_width=True):
-            processed = db.calculate_monthly_kpi_evaluation(selected_month)
-            db.calculate_department_summary(selected_month)
+            with st.spinner("Počítám bonusy..."):
+                processed = db.calculate_monthly_kpi_evaluation(selected_month, verbose=True)
+                db.calculate_department_summary(selected_month)
             # Clear cache to show updated results
             st.cache_data.clear()
             if processed > 0:
@@ -2762,9 +2763,10 @@ elif page == "⚙️ Admin":
                 months = db.get_all_months_with_data()
                 if months:
                     total_processed = 0
-                    with st.spinner("Počítám bonusy..."):
-                        for month in months:
-                            processed = db.calculate_monthly_kpi_evaluation(month)
+                    with st.spinner(f"Počítám bonusy pro {len(months)} měsíců..."):
+                        for idx, month in enumerate(months):
+                            st.info(f"Měsíc {idx+1}/{len(months)}: {month}")
+                            processed = db.calculate_monthly_kpi_evaluation(month, verbose=False)
                             total_processed += processed
                             db.calculate_department_summary(month)
                     # Clear cache to show updated results
