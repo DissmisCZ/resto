@@ -350,7 +350,7 @@ def insert_default_data():
         cursor.execute("SELECT id FROM kpi_definitions WHERE nazev = %s", (kpi_nazev,))
         result = cursor.fetchone()
         if result:
-            kpi_id = result[0]
+            kpi_id = result['id']
             cursor.execute("""
                 INSERT INTO kpi_thresholds
                 (kpi_id, min_hodnota, max_hodnota, operator, bonus_procento, popis, poradi)
@@ -674,7 +674,10 @@ def calculate_bonus_for_value(kpi_id, hodnota):
     conn.close()
 
     for threshold in thresholds:
-        min_val, max_val, operator, bonus = threshold
+        min_val = threshold['min_hodnota']
+        max_val = threshold['max_hodnota']
+        operator = threshold['operator']
+        bonus = threshold['bonus_procento']
 
         if operator == "≥" and min_val is not None:
             if hodnota >= min_val:
@@ -1012,7 +1015,7 @@ def calculate_monthly_department_kpi_evaluation(mesic, department_id=None):
     evaluations = cursor.fetchall()
 
     for row in evaluations:
-        dept_id, kpi_id, value = row
+        dept_id, kpi_id, value = row['department_id'], row['kpi_id'], row['hodnota']
         bonus = calculate_bonus_for_value(kpi_id, value)
         splneno = 1 if bonus > 0 else 0
 
@@ -1078,10 +1081,10 @@ def calculate_department_summary(mesic):
                 """, (mesic, loc_id))
 
                 result = cursor.fetchone()
-                if result and result[0]:
-                    total_bonus += result[0]
-                    total_active += result[1] or 0
-                    total_met += result[2] or 0
+                if result and result['total_bonus']:
+                    total_bonus += result['total_bonus']
+                    total_active += result['kpi_count'] or 0
+                    total_met += result['met_count'] or 0
 
             if locations:
                 # Average across locations
@@ -1154,7 +1157,7 @@ def import_monthly_data_csv(csv_content):
                     errors.append(f"Řada {idx+2}: Lokalita '{location_name}' nebyla nalezena")
                     continue
 
-                location_id = loc_result[0]
+                location_id = loc_result['id']
 
                 cursor.execute("SELECT id FROM kpi_definitions WHERE nazev = %s", (kpi_name,))
                 kpi_result = cursor.fetchone()
@@ -1162,7 +1165,7 @@ def import_monthly_data_csv(csv_content):
                     errors.append(f"Řada {idx+2}: KPI '{kpi_name}' nebyla nalezena")
                     continue
 
-                kpi_id = kpi_result[0]
+                kpi_id = kpi_result['id']
 
                 # Insert data
                 cursor.execute("""
@@ -1585,7 +1588,7 @@ def get_department_kpi_value(mesic, department_id, kpi_id):
         conn.close()
         return None, None
 
-    ma_vlastni_kpi = result[0]
+    ma_vlastni_kpi = result['ma_vlastni_kpi']
 
     if ma_vlastni_kpi:
         # Get own KPI value
@@ -1598,7 +1601,7 @@ def get_department_kpi_value(mesic, department_id, kpi_id):
         cursor.close()
         conn.close()
         if result:
-            return result[0], 'VLASTNI'
+            return result['hodnota'], 'VLASTNI'
         else:
             return None, None
     else:
@@ -1613,8 +1616,8 @@ def get_department_kpi_value(mesic, department_id, kpi_id):
         result = cursor.fetchone()
         cursor.close()
         conn.close()
-        if result and result[0] is not None:
-            return result[0], 'PRUMER_Z_LOKALIT'
+        if result and result['prumer'] is not None:
+            return result['prumer'], 'PRUMER_Z_LOKALIT'
         else:
             return None, None
 

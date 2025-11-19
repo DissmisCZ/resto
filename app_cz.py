@@ -2594,7 +2594,12 @@ elif page == "⚙️ Admin":
             # Check if those IDs exist in related tables
             st.markdown("**🔍 Kontrola foreign keys:**")
             for row in raw_data[:3]:  # Check first 3 records
-                record_id, mesic, loc_id, kpi_id, hodnota, status = row
+                record_id = row['id']
+                mesic = row['mesic']
+                loc_id = row['location_id']
+                kpi_id = row['kpi_id']
+                hodnota = row['hodnota']
+                status = row['status']
 
                 # Check if location exists and is active
                 cursor.execute("SELECT id, nazev, aktivni FROM locations WHERE id = %s", (loc_id,))
@@ -2606,12 +2611,12 @@ elif page == "⚙️ Admin":
 
                 st.text(f"Záznam #{record_id} ({mesic}):")
                 if loc_result:
-                    st.text(f"  ✓ Lokalita ID {loc_id}: {loc_result[1]} (aktivni={loc_result[2]})")
+                    st.text(f"  ✓ Lokalita ID {loc_id}: {loc_result['nazev']} (aktivni={loc_result['aktivni']})")
                 else:
                     st.error(f"  ✗ Lokalita ID {loc_id} NEEXISTUJE!")
 
                 if kpi_result:
-                    st.text(f"  ✓ KPI ID {kpi_id}: {kpi_result[1]} (aktivni={kpi_result[2]})")
+                    st.text(f"  ✓ KPI ID {kpi_id}: {kpi_result['nazev']} (aktivni={kpi_result['aktivni']})")
                 else:
                     st.error(f"  ✗ KPI ID {kpi_id} NEEXISTUJE!")
         else:
